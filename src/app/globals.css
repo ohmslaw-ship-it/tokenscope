@@ -49,7 +49,7 @@ body {
   width: 1px;
   height: 0.9em;
   transform: translate(-50%, -50%);
-  background: var(--color-hairline-strong);
+  background: rgba(243, 247, 251, 0.05);
   pointer-events: none;
 }
 

@@ -1,8 +1,8 @@
 import type { SectionId } from "@/data/sample";
 
-export const sectionGutterColor: Record<SectionId, string> = {
-  system: "bg-accent",
-  example1: "bg-section-example1",
-  example2: "bg-section-example2",
-  user: "bg-section-user",
+export const sectionGutterHex: Record<SectionId, string> = {
+  system: "#7CC4E0",
+  example1: "#5BA2C1",
+  example2: "#3F7F9D",
+  user: "#2C5D76",
 };
