@@ -34,3 +34,32 @@ body {
 .font-mono {
   font-family: var(--font-mono), ui-monospace, monospace;
 }
+
+.prompt-token {
+  position: relative;
+  border-radius: 2px;
+}
+
+.prompt-token:not(:first-child)::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 1px;
+  height: 0.9em;
+  transform: translate(-50%, -50%);
+  background: rgba(240, 237, 230, 0.1);
+  pointer-events: none;
+}
+
+.prompt-token--odd {
+  color: #d4cbba;
+}
+
+.prompt-token--even {
+  color: #bfb5a3;
+}
+
+.prompt-token--hover {
+  background: rgba(198, 168, 117, 0.18);
+}
