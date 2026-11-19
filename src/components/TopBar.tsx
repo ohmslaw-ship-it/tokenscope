@@ -24,9 +24,9 @@ function ChevronDown() {
 export function TopBar() {
   return (
     <header className="flex h-14 items-center justify-between border-b border-hairline px-6">
-      <div className="font-serif text-[22px] leading-none text-accent">
+      <div className="font-serif text-[22px] leading-none text-text">
         <span className="font-normal not-italic">Token</span>
-        <span className="italic">scope</span>
+        <span className="italic text-accent">scope</span>
       </div>
 
       <div className="flex items-center gap-2">

@@ -1,21 +1,22 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #0c0b0a;
-  --color-surface: #1a160f;
-  --color-text: #f0ede6;
-  --color-text-2: #d4cbba;
-  --color-muted: #9a9488;
-  --color-faint: #6e675c;
-  --color-dim: #5a554c;
-  --color-accent: #c6a875;
-  --color-accent-soft: #e8d4b0;
-  --color-section-system: #c6a875;
-  --color-section-example1: #a6855c;
-  --color-section-example2: #7e6648;
-  --color-section-user: #e8d4b0;
-  --color-hairline: rgba(240, 237, 230, 0.08);
-  --color-hairline-strong: rgba(240, 237, 230, 0.12);
+  --color-bg: #0a1226;
+  --color-surface: #112040;
+  --color-text: #f3f7fb;
+  --color-text-2: #d7e0ea;
+  --color-muted: #8c9bb2;
+  --color-faint: #5a6982;
+  --color-dim: #43516b;
+  --color-accent: #7cc4e0;
+  --color-accent-soft: #bfe7f4;
+  --color-section-system: #7cc4e0;
+  --color-section-example1: #5ba2c1;
+  --color-section-example2: #3f7f9d;
+  --color-section-user: #2c5d76;
+  --color-hairline: rgba(243, 247, 251, 0.08);
+  --color-hairline-strong: rgba(243, 247, 251, 0.12);
+  --color-token-hover: rgba(124, 196, 224, 0.18);
   --radius-control: 6px;
   --font-family-serif: var(--font-serif);
   --font-family-mono: var(--font-mono);
@@ -48,18 +49,18 @@ body {
   width: 1px;
   height: 0.9em;
   transform: translate(-50%, -50%);
-  background: rgba(240, 237, 230, 0.1);
+  background: var(--color-hairline-strong);
   pointer-events: none;
 }
 
 .prompt-token--odd {
-  color: #d4cbba;
+  color: var(--color-text-2);
 }
 
 .prompt-token--even {
-  color: #bfb5a3;
+  color: var(--color-muted);
 }
 
 .prompt-token--hover {
-  background: rgba(198, 168, 117, 0.18);
+  background: var(--color-token-hover);
 }
