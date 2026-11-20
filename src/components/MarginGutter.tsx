@@ -1,5 +1,4 @@
 import type { SectionId } from "@/data/sample";
-import { sectionGutterHex } from "@/lib/section-colors";
 
 interface MarginGutterProps {
   sectionId: SectionId;
@@ -16,8 +15,6 @@ export function MarginGutter({
   contentHeight,
   className,
 }: MarginGutterProps) {
-  const barColor = sectionGutterHex[sectionId];
-
   return (
     <div
       className={`flex h-full min-h-0 items-stretch justify-end gap-3 ${className ?? ""}`}
@@ -30,8 +27,7 @@ export function MarginGutter({
         </span>
       </div>
       <div
-        className="w-[3px] shrink-0 self-stretch rounded-full"
-        style={{ backgroundColor: barColor }}
+        className={`margin-gutter-bar margin-gutter-bar--${sectionId}`}
         aria-hidden
       />
     </div>

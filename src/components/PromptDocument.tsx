@@ -39,20 +39,17 @@ function TokenLayer({
   return (
     <div
       ref={layerRef}
-      className={`${DOCUMENT_CLASS} col-start-1 row-start-1 pointer-events-none text-text-2`}
+      className={`${DOCUMENT_CLASS} col-start-1 row-start-1 pointer-events-none`}
       aria-hidden
     >
       {tokens.map((token, index) => {
         const isHovered = hoveredIndex === index;
-        const parity = index % 2 === 0 ? "odd" : "even";
 
         return (
           <span
             key={`${index}-${token.id}`}
             data-token-index={index}
-            className={`prompt-token prompt-token--${parity}${
-              isHovered ? " prompt-token--hover" : ""
-            }`}
+            className={`prompt-token${isHovered ? " prompt-token--hover" : ""}`}
           >
             {token.text}
           </span>
