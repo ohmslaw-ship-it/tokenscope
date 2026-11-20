@@ -1,5 +1,11 @@
 export type TokenizerTier = "exact" | "estimated";
 
+export type LongContextPricing = {
+  thresholdInput: number;
+  inputMultiplier: number;
+  outputMultiplier: number;
+};
+
 export type ModelDefinition = {
   id: string;
   name: string;
@@ -7,47 +13,67 @@ export type ModelDefinition = {
   contextWindow: number;
   inputPricePerM: number;
   outputPricePerM: number;
+  maxInput?: number;
+  longContext?: LongContextPricing;
+  priceNote?: string;
 };
 
 /** Pricing verified from provider docs fetched 20 Nov 2026. */
 export const PRICES_AS_OF = "20 Nov 2026";
 
+const openAiLongContext: LongContextPricing = {
+  thresholdInput: 272_000,
+  inputMultiplier: 2,
+  outputMultiplier: 1.5,
+};
+
 export const models: ModelDefinition[] = [
   {
-    id: "gpt-5",
-    name: "GPT-5",
-    tokenizer: "exact",
-    // developers.openai.com/api/docs/models/gpt-5
-    contextWindow: 400_000,
-    inputPricePerM: 1.25,
+    id: "gpt-6.2-sol",
+    name: "GPT-6.2 Sol",
+    tokenizer: "estimated",
+    contextWindow: 1_050_000,
+    maxInput: 922_000,
+    inputPricePerM: 2,
     outputPricePerM: 10,
+    longContext: openAiLongContext,
   },
   {
-    id: "gpt-4o",
-    name: "GPT-4o",
+    id: "gpt-6.2-astra",
+    name: "GPT-6.2 Astra",
+    tokenizer: "estimated",
+    contextWindow: 1_050_000,
+    maxInput: 922_000,
+    inputPricePerM: 8,
+    outputPricePerM: 40,
+    longContext: openAiLongContext,
+  },
+  {
+    id: "gpt-5.6-terra",
+    name: "GPT-5.6 Terra",
     tokenizer: "exact",
-    // developers.openai.com/api/docs/models/gpt-4o
-    contextWindow: 128_000,
-    inputPricePerM: 2.5,
-    outputPricePerM: 10,
+    contextWindow: 1_050_000,
+    maxInput: 922_000,
+    inputPricePerM: 2,
+    outputPricePerM: 12,
+    longContext: openAiLongContext,
   },
   {
     id: "claude-sonnet-5-5",
     name: "Claude Sonnet 5.5",
     tokenizer: "estimated",
-    // platform.claude.com/docs/en/models/overview — Claude Sonnet 5.5
     contextWindow: 1_000_000,
     inputPricePerM: 2,
     outputPricePerM: 10,
   },
   {
-    id: "gemini-3-8-flash",
+    id: "gemini-3.8-flash",
     name: "Gemini 3.8 Flash",
     tokenizer: "estimated",
-    // aistudio.google.com/docs/models/gemini-3.8-flash; pricing paid tier through 31 Dec 2026
     contextWindow: 1_048_576,
     inputPricePerM: 0.75,
     outputPricePerM: 3.75,
+    priceNote: "Promo rate until 31 Dec 2026 ($1.50 / $7.50 after)",
   },
 ];
 

@@ -46,12 +46,21 @@ export function ContextBar({
   }, []);
 
   const usedTokens = totalInputTokens + RESERVED_REPLY_TOKENS;
-  const { contextWindow } = model;
+  const { contextWindow, maxInput } = model;
   const usageRatio = usedTokens / contextWindow;
   const percent = formatPercent(usedTokens, contextWindow);
   const overBy = usedTokens - contextWindow;
+  const inputOverBy =
+    maxInput != null ? totalInputTokens - maxInput : 0;
+  const overInputLimit = inputOverBy > 0;
+  const overContextWindow = overBy > 0;
 
-  const status = overBy > 0 ? "over" : percent > 80 ? "warn" : "ok";
+  const status =
+    overInputLimit || overContextWindow
+      ? "over"
+      : percent > 80
+        ? "warn"
+        : "ok";
 
   const segmentWeights = useMemo(() => {
     const weights: { key: string; weight: number; color: string; hatched?: boolean }[] =
@@ -95,7 +104,19 @@ export function ContextBar({
         style={{ color: textColor }}
       >
         {status === "over" ? (
-          <>Over the limit by {overBy.toLocaleString()} tokens</>
+          <>
+            {overInputLimit ? (
+              <>
+                Over the input limit by {inputOverBy.toLocaleString()} tokens
+              </>
+            ) : null}
+            {overInputLimit && overContextWindow ? (
+              <span className="mx-2">·</span>
+            ) : null}
+            {overContextWindow ? (
+              <>Over the limit by {overBy.toLocaleString()} tokens</>
+            ) : null}
+          </>
         ) : prefersReducedMotion ? (
           <>
             {usedTokens.toLocaleString()} of {contextWindow.toLocaleString()} tokens ·{" "}

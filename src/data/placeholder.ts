@@ -10,14 +10,14 @@ export const sectionTokenCounts: Record<SectionId, number> = {
 export const totalTokens = 414;
 export const encodingName = "o200k_base";
 
-export const selectedModelLabel = "GPT-5 · exact";
-export const selectedModelShort = "GPT-5 exact";
+export const selectedModelLabel = "GPT-6.2 Sol · estimated";
+export const selectedModelShort = "GPT-6.2 Sol estimated";
 
 export const monthlyCostInr = 63_317;
 
 export const marginNote = {
   savingsInr: 1_997,
-  model: "GPT-5",
+  model: "GPT-6.2 Sol",
 };
 
 export const ledgerComparisons = [
@@ -34,7 +34,7 @@ export const ledgerComparisons = [
     deltaInr: 4_352,
   },
   {
-    name: "GPT-4o",
+    name: "GPT-5.6 Terra",
     tier: "exact" as const,
     costInr: 70_571,
     deltaInr: 7_254,
@@ -47,6 +47,6 @@ export const usageAssumptions = {
 };
 
 export const pricingFootnote = {
-  asOf: "19 Nov 2026",
+  asOf: "20 Nov 2026",
   fxInrPerUsd: 93.44,
 };
