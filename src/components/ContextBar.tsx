@@ -4,13 +4,11 @@ import NumberFlow from "@number-flow/react";
 import { motion } from "motion/react";
 import { useMemo, useRef, useState, useLayoutEffect } from "react";
 
-import { usageAssumptions } from "@/data/placeholder";
 import type { ModelDefinition } from "@/data/models";
 import type { SectionId } from "@/data/sample";
 import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { sectionGutterHex } from "@/lib/section-colors";
 
-const RESERVED_REPLY_TOKENS = usageAssumptions.replyTokens;
 const TRACK_COLOR = "rgba(243, 247, 251, 0.06)";
 const RESERVED_FILL = "rgba(243, 247, 251, 0.16)";
 
@@ -20,6 +18,7 @@ type ContextBarProps = {
   model: ModelDefinition;
   totalInputTokens: number;
   tokensBySection: Record<SectionId, number>;
+  replyTokens: number;
 };
 
 function formatPercent(used: number, limit: number): number {
@@ -30,6 +29,7 @@ export function ContextBar({
   model,
   totalInputTokens,
   tokensBySection,
+  replyTokens,
 }: ContextBarProps) {
   const prefersReducedMotion = usePrefersReducedMotion();
   const trackRef = useRef<HTMLDivElement>(null);
@@ -45,7 +45,7 @@ export function ContextBar({
     return () => observer.disconnect();
   }, []);
 
-  const usedTokens = totalInputTokens + RESERVED_REPLY_TOKENS;
+  const usedTokens = totalInputTokens + replyTokens;
   const { contextWindow, maxInput } = model;
   const usageRatio = usedTokens / contextWindow;
   const percent = formatPercent(usedTokens, contextWindow);
@@ -71,12 +71,12 @@ export function ContextBar({
       }));
     weights.push({
       key: "reserved",
-      weight: RESERVED_REPLY_TOKENS,
+      weight: replyTokens,
       color: RESERVED_FILL,
       hatched: true,
     });
     return weights;
-  }, [tokensBySection]);
+  }, [tokensBySection, replyTokens]);
 
   const totalWeight = segmentWeights.reduce((sum, s) => sum + s.weight, 0);
 

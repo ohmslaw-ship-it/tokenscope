@@ -20,6 +20,7 @@ export type ModelDefinition = {
 
 /** Pricing verified from provider docs fetched 20 Nov 2026. */
 export const PRICES_AS_OF = "20 Nov 2026";
+export const FX_INR_PER_USD = 93.44;
 
 const openAiLongContext: LongContextPricing = {
   thresholdInput: 272_000,

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 import { models, type ModelDefinition } from "@/data/models";
+import type { CostCurrency } from "@/lib/cost";
 
 function ChevronDown() {
   return (
@@ -28,9 +29,16 @@ function ChevronDown() {
 type TopBarProps = {
   selectedModel: ModelDefinition;
   onSelectModel: (id: string) => void;
+  currency: CostCurrency;
+  onCurrencyChange: (currency: CostCurrency) => void;
 };
 
-export function TopBar({ selectedModel, onSelectModel }: TopBarProps) {
+export function TopBar({
+  selectedModel,
+  onSelectModel,
+  currency,
+  onCurrencyChange,
+}: TopBarProps) {
   const [open, setOpen] = useState(false);
   const [highlightIndex, setHighlightIndex] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -128,13 +136,25 @@ export function TopBar({ selectedModel, onSelectModel }: TopBarProps) {
         >
           <button
             type="button"
-            className="min-w-[36px] rounded-[4px] bg-surface px-2 py-1.5 font-mono text-[12px] text-text"
+            className={`min-w-[36px] rounded-[4px] px-2 py-1.5 font-mono text-[12px] ${
+              currency === "INR"
+                ? "bg-surface text-text"
+                : "text-muted"
+            }`}
+            aria-pressed={currency === "INR"}
+            onClick={() => onCurrencyChange("INR")}
           >
             ₹
           </button>
           <button
             type="button"
-            className="min-w-[36px] rounded-[4px] px-2 py-1.5 font-mono text-[12px] text-muted"
+            className={`min-w-[36px] rounded-[4px] px-2 py-1.5 font-mono text-[12px] ${
+              currency === "USD"
+                ? "bg-surface text-text"
+                : "text-muted"
+            }`}
+            aria-pressed={currency === "USD"}
+            onClick={() => onCurrencyChange("USD")}
           >
             $
           </button>

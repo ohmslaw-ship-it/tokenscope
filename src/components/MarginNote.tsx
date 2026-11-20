@@ -1,16 +1,53 @@
-import { marginNote } from "@/data/placeholder";
+"use client";
 
-const formatInr = (value: number) =>
-  new Intl.NumberFormat("en-IN").format(value);
+import NumberFlow from "@number-flow/react";
 
-export function MarginNote() {
+import type { ModelDefinition } from "@/data/models";
+import {
+  numberFlowFormat,
+  removedInputMonthlySavingsDisplay,
+  type CostCurrency,
+} from "@/lib/cost";
+
+type MarginNoteProps = {
+  selectedModel: ModelDefinition;
+  inputTokens: number;
+  outputTokens: number;
+  requestsPerDay: number;
+  example1Tokens: number;
+  currency: CostCurrency;
+};
+
+export function MarginNote({
+  selectedModel,
+  inputTokens,
+  outputTokens,
+  requestsPerDay,
+  example1Tokens,
+  currency,
+}: MarginNoteProps) {
+  const savingsDisplay = removedInputMonthlySavingsDisplay(
+    selectedModel,
+    inputTokens,
+    outputTokens,
+    requestsPerDay,
+    example1Tokens,
+    currency,
+  );
+
+  if (savingsDisplay <= 0) return null;
+
+  const symbol = currency === "INR" ? "₹" : "$";
+  const flowFormat = numberFlowFormat(currency, savingsDisplay);
+
   return (
     <aside
       className="w-[200px] shrink-0 border-l border-accent py-1 pl-4 font-serif text-[13px] italic leading-snug text-accent"
       aria-label="Cost suggestion"
     >
-      Cut this example and save ₹{formatInr(marginNote.savingsInr)} a month on{" "}
-      {marginNote.model}.
+      Cut this example and save {symbol}
+      <NumberFlow value={savingsDisplay} format={flowFormat} willChange /> a
+      month on {selectedModel.name}.
     </aside>
   );
 }

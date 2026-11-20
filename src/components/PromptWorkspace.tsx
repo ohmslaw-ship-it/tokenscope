@@ -11,6 +11,11 @@ import { TopBar } from "@/components/TopBar";
 import { defaultModelId, getModelById } from "@/data/models";
 import type { SectionId } from "@/data/sample";
 import { useTokens } from "@/hooks/useTokens";
+import {
+  DEFAULT_REPLY_TOKENS,
+  DEFAULT_REQUESTS_PER_DAY,
+  type CostCurrency,
+} from "@/lib/cost";
 
 const sectionSpacing = "pt-8";
 const gridColumns = "140px 680px 200px 240px";
@@ -18,6 +23,9 @@ const gridColumns = "140px 680px 200px 240px";
 export function PromptWorkspace() {
   const { sections, total } = useTokens();
   const [modelId, setModelId] = useState(defaultModelId);
+  const [currency, setCurrency] = useState<CostCurrency>("INR");
+  const [requestsPerDay, setRequestsPerDay] = useState(DEFAULT_REQUESTS_PER_DAY);
+  const [replyTokens, setReplyTokens] = useState(DEFAULT_REPLY_TOKENS);
   const selectedModel = getModelById(modelId);
   const [sectionHeights, setSectionHeights] = useState<
     Partial<Record<SectionId, number>>
@@ -45,11 +53,17 @@ export function PromptWorkspace() {
   return (
     <div className="min-h-screen bg-bg">
       <div className="mx-auto w-full max-w-[1280px]">
-        <TopBar selectedModel={selectedModel} onSelectModel={setModelId} />
+        <TopBar
+          selectedModel={selectedModel}
+          onSelectModel={setModelId}
+          currency={currency}
+          onCurrencyChange={setCurrency}
+        />
         <ContextBar
           model={selectedModel}
           totalInputTokens={total}
           tokensBySection={tokensBySection}
+          replyTokens={replyTokens}
         />
 
         <main className="pb-16 pt-10">
@@ -89,7 +103,16 @@ export function PromptWorkspace() {
                     className={index > 0 ? sectionSpacing : undefined}
                     style={{ gridColumn: 3, gridRow: row }}
                   >
-                    {section.id === "example1" ? <MarginNote /> : null}
+                    {section.id === "example1" ? (
+                      <MarginNote
+                        selectedModel={selectedModel}
+                        inputTokens={total}
+                        outputTokens={replyTokens}
+                        requestsPerDay={requestsPerDay}
+                        example1Tokens={tokensBySection.example1}
+                        currency={currency}
+                      />
+                    ) : null}
                   </div>
                 </Fragment>
               );
@@ -102,7 +125,16 @@ export function PromptWorkspace() {
                 gridRow: `1 / span ${ledgerRowSpan}`,
               }}
             >
-              <Ledger />
+              <Ledger
+                selectedModel={selectedModel}
+                inputTokens={total}
+                outputTokens={replyTokens}
+                requestsPerDay={requestsPerDay}
+                onRequestsPerDayChange={setRequestsPerDay}
+                onReplyTokensChange={setReplyTokens}
+                currency={currency}
+                onSelectModel={setModelId}
+              />
             </div>
 
             <div style={{ gridColumn: 2, gridRow: sections.length + 1 }}>
