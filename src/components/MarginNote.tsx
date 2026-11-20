@@ -45,9 +45,12 @@ export function MarginNote({
       className="w-[200px] shrink-0 border-l border-accent py-1 pl-4 font-serif text-[13px] italic leading-snug text-accent"
       aria-label="Cost suggestion"
     >
-      Cut this example and save {symbol}
-      <NumberFlow value={savingsDisplay} format={flowFormat} willChange /> a
-      month on {selectedModel.name}.
+      Cut this example and save{" "}
+      <span className="whitespace-nowrap">
+        {symbol}
+        <NumberFlow value={savingsDisplay} format={flowFormat} willChange />
+      </span>{" "}
+      a month on {selectedModel.name}.
     </aside>
   );
 }

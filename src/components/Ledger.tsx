@@ -109,6 +109,11 @@ export function Ledger({
       <p className="mt-2 font-mono text-[12px] text-muted">
         {selectedModel.name} · {selectedModel.tokenizer}
       </p>
+      {selectedModel.priceNote ? (
+        <p className="mt-2 font-mono text-[10px] leading-relaxed text-faint">
+          {selectedModel.priceNote}
+        </p>
+      ) : null}
 
       <ul className="mt-8 border-t border-hairline">
         {comparisonRows.map((row) => (
@@ -135,7 +140,9 @@ export function Ledger({
                   {formatCostInteger(row.cost, currency)}
                 </span>
                 <span className="font-mono text-[12px] text-muted">
-                  {formatCostDelta(row.delta, currency)}
+                  {row.delta === 0
+                    ? "same price"
+                    : formatCostDelta(row.delta, currency)}
                 </span>
               </div>
               {row.model.priceNote ? (
