@@ -12,6 +12,9 @@ type InlineEditableNumberProps = {
   ariaLabel: string;
 };
 
+const look =
+  "inline border-0 bg-transparent p-0 text-inherit underline decoration-dotted decoration-transparent underline-offset-[3px] hover:decoration-current/50";
+
 export function InlineEditableNumber({
   value,
   onCommit,
@@ -24,10 +27,6 @@ export function InlineEditableNumber({
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(String(value));
   const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (!editing) setDraft(String(value));
-  }, [value, editing]);
 
   useEffect(() => {
     if (editing) {
@@ -67,7 +66,8 @@ export function InlineEditableNumber({
           }
         }}
         aria-label={ariaLabel}
-        className={`w-[7ch] min-w-[4ch] border-0 border-b border-hairline bg-transparent p-0 font-mono text-[11px] text-muted outline-none ${inputClassName}`}
+        style={{ width: `${Math.max(draft.length, 1) + 0.5}ch` }}
+        className={`${look} decoration-current/50 outline-none ${className} ${inputClassName}`}
       />
     );
   }
@@ -75,9 +75,12 @@ export function InlineEditableNumber({
   return (
     <button
       type="button"
-      onClick={() => setEditing(true)}
+      onClick={() => {
+        setDraft(String(value));
+        setEditing(true);
+      }}
       aria-label={`Edit ${ariaLabel}`}
-      className={`cursor-text border-0 bg-transparent p-0 font-mono text-[11px] text-muted underline decoration-transparent underline-offset-2 transition-colors hover:decoration-hairline ${className}`}
+      className={`${look} cursor-text ${className}`}
     >
       {format(value)}
     </button>

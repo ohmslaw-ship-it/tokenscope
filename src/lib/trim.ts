@@ -173,6 +173,15 @@ function capitalizeReplacement(text: string, replacement: string): string {
   return replacement.charAt(0).toUpperCase() + replacement.slice(1);
 }
 
+/** Capitalise the first letter of the word that now starts a sentence. */
+function capitalizeFollowingWord(text: string, index: number): string {
+  const rest = text.slice(index);
+  const match = /^(\s*[^A-Za-z]*)([a-z])/.exec(rest);
+  if (!match) return text;
+  const at = index + match[1].length;
+  return text.slice(0, at) + match[2].toUpperCase() + text.slice(at + 1);
+}
+
 function collapseSpaces(text: string): string {
   return text.replace(/  +/g, " ").replace(/^\s+/, "").replace(/\s+$/, "");
 }
@@ -185,9 +194,18 @@ export function applySuggestionToText(
   const sorted = [...ranges].sort((a, b) => b.start - a.start);
   let result = text;
   for (const range of sorted) {
+    const capNext =
+      replacement.trim().length === 0 &&
+      needsCapitalisation(result, range.start);
     const before = result.slice(0, range.start);
     const after = result.slice(range.end);
     result = before + replacement + after;
+    if (capNext) {
+      result = capitalizeFollowingWord(
+        result,
+        before.length + replacement.length,
+      );
+    }
   }
   return collapseSpaces(result);
 }

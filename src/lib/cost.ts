@@ -74,6 +74,16 @@ export function monthlyCostUsd(
   );
 }
 
+export function displayValueFromMonthlyUsd(
+  usd: number,
+  currency: CostCurrency,
+): number {
+  if (currency === "USD") {
+    return usd >= 1_000 ? Math.round(usd) : Math.round(usd * 100) / 100;
+  }
+  return Math.round(usdToInr(usd));
+}
+
 export function monthlyDisplayValue(
   model: ModelDefinition,
   inputTokens: number,
@@ -81,11 +91,44 @@ export function monthlyDisplayValue(
   requestsPerDay: number,
   currency: CostCurrency,
 ): number {
-  const usd = monthlyCostUsd(model, inputTokens, outputTokens, requestsPerDay);
-  if (currency === "USD") {
-    return usd >= 1_000 ? Math.round(usd) : Math.round(usd * 100) / 100;
-  }
-  return Math.round(usdToInr(usd));
+  return displayValueFromMonthlyUsd(
+    monthlyCostUsd(model, inputTokens, outputTokens, requestsPerDay),
+    currency,
+  );
+}
+
+export type RequestCostParts = {
+  inputUsd: number;
+  outputUsd: number;
+  totalUsd: number;
+  replyShare: number;
+};
+
+/** Input vs output split for one request, including long-context pricing. */
+export function requestCostParts(
+  model: ModelDefinition,
+  inputTokens: number,
+  outputTokens: number,
+): RequestCostParts {
+  const totalUsd = perRequestUSD(model, inputTokens, outputTokens);
+  const inputUsd = perRequestUSD(model, inputTokens, 0);
+  const outputUsd = Math.max(0, totalUsd - inputUsd);
+  return {
+    inputUsd,
+    outputUsd,
+    totalUsd,
+    replyShare: totalUsd > 0 ? outputUsd / totalUsd : 0,
+  };
+}
+
+/** This input section's fraction of the full per-request cost. */
+export function inputSectionShare(
+  parts: RequestCostParts,
+  sectionTokens: number,
+  inputTokens: number,
+): number {
+  if (parts.totalUsd <= 0 || inputTokens <= 0 || sectionTokens <= 0) return 0;
+  return (sectionTokens / inputTokens) * (parts.inputUsd / parts.totalUsd);
 }
 
 export function removedInputMonthlySavingsInr(

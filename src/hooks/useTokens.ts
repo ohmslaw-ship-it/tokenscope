@@ -41,8 +41,6 @@ export function useTokens() {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const textsRef = useRef(texts);
 
-  textsRef.current = texts;
-
   const postTokenize = useCallback((sections: string[]) => {
     const worker = workerRef.current;
     if (!worker) return;
@@ -81,6 +79,7 @@ export function useTokens() {
   }, [postTokenize]);
 
   useEffect(() => {
+    textsRef.current = texts;
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       postTokenize(promptSections.map((section) => textsRef.current[section.id]));

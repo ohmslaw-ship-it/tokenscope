@@ -1,11 +1,10 @@
 "use client";
 
-import NumberFlow from "@number-flow/react";
-import { useCallback, type ReactNode } from "react";
+import { useCallback } from "react";
 
 import type { ModelDefinition } from "@/data/models";
 import {
-  numberFlowFormat,
+  formatCostInteger,
   removedInputMonthlySavingsDisplay,
   type CostCurrency,
 } from "@/lib/cost";
@@ -22,60 +21,14 @@ type MarginNoteProps = {
   onHoverChange: (hovered: boolean) => void;
 };
 
-function SavingsSpan({
-  value,
-  currency,
-}: {
-  value: number;
-  currency: CostCurrency;
-}) {
-  const symbol = currency === "INR" ? "₹" : "$";
-  const flowFormat = numberFlowFormat(currency, value);
-  return (
-    <span className="whitespace-nowrap">
-      {symbol}
-      <NumberFlow value={value} format={flowFormat} willChange />
-    </span>
-  );
-}
-
-function noteBody(
-  suggestion: Suggestion,
-  modelName: string,
-  savings: number,
-  currency: CostCurrency,
-): ReactNode {
-  const saves = (
-    <>
-      {" "}
-      Saves <SavingsSpan value={savings} currency={currency} /> a month.
-    </>
-  );
-
-  if (suggestion.kind === "wordy") {
-    const replacement = suggestion.replacement;
-    const canBe = replacement ? `"${replacement}"` : "removed";
-    return (
-      <>
-        &quot;{suggestion.phrase}&quot; can be {canBe}.{saves}
-      </>
-    );
+function trimCopy(suggestion: Suggestion, savings: string): string {
+  if (suggestion.kind === "wordy" && suggestion.phrase) {
+    return `Cut "${suggestion.phrase}" · save ${savings}/mo`;
   }
-
   if (suggestion.kind === "repeat") {
-    return (
-      <>
-        This repeats a line in {suggestion.repeatFromLabel}.{saves}
-      </>
-    );
+    return `Cut a repeated line · save ${savings}/mo`;
   }
-
-  return (
-    <>
-      Cut this example and save <SavingsSpan value={savings} currency={currency} /> a month
-      on {modelName}.
-    </>
-  );
+  return `Cut this example · save ${savings}/mo`;
 }
 
 export function MarginNote({
@@ -97,27 +50,29 @@ export function MarginNote({
     currency,
   );
 
-  if (savingsDisplay <= 0) return null;
-
   const handleEnter = useCallback(() => onHoverChange(true), [onHoverChange]);
   const handleLeave = useCallback(() => onHoverChange(false), [onHoverChange]);
 
+  if (savingsDisplay <= 0) return null;
+
+  const symbol = currency === "INR" ? "₹" : "$";
+  const savings = `${symbol}${formatCostInteger(savingsDisplay, currency)}`;
+
   return (
-    <aside
-      className="w-[200px] shrink-0 border-l border-accent py-1 pl-4 font-serif text-[13px] italic leading-snug text-accent"
-      aria-label="Trim suggestion"
+    <div
+      className="mt-3 flex items-baseline justify-between gap-4 border-t border-white/[0.06] pt-3 text-[12.5px] text-accent-soft"
       onMouseEnter={handleEnter}
       onMouseLeave={handleLeave}
     >
-      <p>{noteBody(suggestion, selectedModel.name, savingsDisplay, currency)}</p>
+      <p>{trimCopy(suggestion, savings)}</p>
       <button
         type="button"
         onClick={onApply}
-        className="mt-1.5 cursor-pointer border-0 bg-transparent p-0 font-serif text-[12px] not-italic text-accent underline-offset-2 hover:underline"
+        className="shrink-0 cursor-pointer border-0 bg-transparent p-0 font-medium text-accent"
       >
         Apply
       </button>
-    </aside>
+    </div>
   );
 }
 
@@ -125,22 +80,20 @@ type AppliedMarginNoteProps = {
   onUndo: () => void;
 };
 
-export function AppliedMarginNote({
-  onUndo,
-}: AppliedMarginNoteProps) {
+export function AppliedMarginNote({ onUndo }: AppliedMarginNoteProps) {
   return (
-    <aside
-      className="w-[200px] shrink-0 py-1 pl-4 font-serif text-[13px] leading-snug text-faint"
+    <p
+      className="mt-3 border-t border-white/[0.06] pt-3 text-[12.5px] text-accent-soft"
       aria-live="polite"
     >
       Applied ·{" "}
       <button
         type="button"
         onClick={onUndo}
-        className="cursor-pointer border-0 bg-transparent p-0 font-serif text-faint underline-offset-2 hover:text-accent hover:underline"
+        className="cursor-pointer border-0 bg-transparent p-0 font-medium text-accent"
       >
         Undo
       </button>
-    </aside>
+    </p>
   );
 }

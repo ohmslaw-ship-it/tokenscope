@@ -1,12 +1,9 @@
 "use client";
 
-import { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { Ledger } from "@/components/Ledger";
-import { MarginGutter } from "@/components/MarginGutter";
-import { AppliedMarginNote, MarginNote } from "@/components/MarginNote";
-import { EditablePromptSection, PromptFooter } from "@/components/PromptDocument";
-import { ContextBar } from "@/components/ContextBar";
+import { CostHero } from "@/components/CostHero";
+import { RequestFlow } from "@/components/RequestFlow";
 import { TopBar } from "@/components/TopBar";
 import { defaultModelId, getModelById } from "@/data/models";
 import type { SectionId } from "@/data/sample";
@@ -16,15 +13,8 @@ import {
   DEFAULT_REQUESTS_PER_DAY,
   type CostCurrency,
 } from "@/lib/cost";
-import {
-  analyze,
-  applySuggestionToText,
-  charRangesToTokenIndices,
-  type Suggestion,
-} from "@/lib/trim";
+import { analyze, applySuggestionToText, type Suggestion } from "@/lib/trim";
 
-const sectionSpacing = "pt-8";
-const gridColumns = "140px 680px 200px 240px";
 const UNDO_MS = 6_000;
 
 type UndoState = {
@@ -38,22 +28,12 @@ export function PromptWorkspace() {
   const [currency, setCurrency] = useState<CostCurrency>("INR");
   const [requestsPerDay, setRequestsPerDay] = useState(DEFAULT_REQUESTS_PER_DAY);
   const [replyTokens, setReplyTokens] = useState(DEFAULT_REPLY_TOKENS);
-  const selectedModel = getModelById(modelId);
-  const [sectionHeights, setSectionHeights] = useState<
-    Partial<Record<SectionId, number>>
-  >({});
-  const [hoveredSuggestionId, setHoveredSuggestionId] = useState<string | null>(
-    null,
-  );
+  const [hoveredSuggestionId, setHoveredSuggestionId] = useState<string | null>(null);
   const [undo, setUndo] = useState<UndoState | null>(null);
+  const selectedModel = getModelById(modelId);
 
   const promptSectionsForAnalyze = useMemo(
-    () =>
-      sections.map(({ id, label, text }) => ({
-        id,
-        label,
-        text,
-      })),
+    () => sections.map(({ id, label, text }) => ({ id, label, text })),
     [sections],
   );
 
@@ -62,47 +42,14 @@ export function PromptWorkspace() {
     [promptSectionsForAnalyze],
   );
 
-  const visibleSuggestions = useMemo(
-    () => suggestions.slice(0, 3),
-    [suggestions],
-  );
-
   const hoveredSuggestion = useMemo(
-    () =>
-      visibleSuggestions.find((s) => s.id === hoveredSuggestionId) ?? null,
-    [visibleSuggestions, hoveredSuggestionId],
-  );
-
-  const suggestionsBySection = useMemo(() => {
-    const map = new Map<SectionId, Suggestion[]>();
-    for (const suggestion of visibleSuggestions) {
-      const list = map.get(suggestion.sectionId) ?? [];
-      list.push(suggestion);
-      map.set(suggestion.sectionId, list);
-    }
-    return map;
-  }, [visibleSuggestions]);
-
-  const tokensBySection = sections.reduce(
-    (acc, section) => {
-      acc[section.id] = section.tokens.length;
-      return acc;
-    },
-    {} as Record<SectionId, number>,
-  );
-
-  const makeHeightHandler = useCallback(
-    (id: SectionId) => (height: number) => {
-      setSectionHeights((prev) =>
-        prev[id] === height ? prev : { ...prev, [id]: height },
-      );
-    },
-    [],
+    () => suggestions.find((suggestion) => suggestion.id === hoveredSuggestionId) ?? null,
+    [suggestions, hoveredSuggestionId],
   );
 
   const handleApply = useCallback(
     (suggestion: Suggestion) => {
-      const section = sections.find((s) => s.id === suggestion.sectionId);
+      const section = sections.find((item) => item.id === suggestion.sectionId);
       if (!section) return;
       const previousText = section.text;
       const nextText = applySuggestionToText(
@@ -119,10 +66,8 @@ export function PromptWorkspace() {
 
   const handleUndo = useCallback(() => {
     if (!undo) return;
-    const section = sections.find((s) => s.id === undo.sectionId);
-    if (section) {
-      section.setText(undo.previousText);
-    }
+    const section = sections.find((item) => item.id === undo.sectionId);
+    if (section) section.setText(undo.previousText);
     setUndo(null);
   }, [sections, undo]);
 
@@ -132,122 +77,52 @@ export function PromptWorkspace() {
     return () => clearTimeout(timer);
   }, [undo]);
 
-  const ledgerRowSpan = sections.length + 1;
-
   return (
-    <div className="min-h-screen bg-bg">
-      <div className="mx-auto w-full max-w-[1280px]">
-        <TopBar
-          selectedModel={selectedModel}
-          onSelectModel={setModelId}
-          currency={currency}
-          onCurrencyChange={setCurrency}
-        />
-        <ContextBar
+    <div className="relative min-h-screen bg-bg min-[1100px]:h-screen min-[1100px]:overflow-hidden">
+      <div
+        aria-hidden
+        className="pointer-events-none fixed top-[-380px] left-[-200px] z-0 h-[900px] w-[1300px]"
+        style={{
+          background:
+            "radial-gradient(closest-side, rgba(40,70,130,.32), transparent)",
+        }}
+      />
+      <div className="relative z-10 min-h-screen min-[1100px]:h-full">
+        <div className="px-6 min-[1100px]:px-16">
+          <TopBar
+            selectedModel={selectedModel}
+            onSelectModel={setModelId}
+            currency={currency}
+            onCurrencyChange={setCurrency}
+            usedTokens={total + replyTokens}
+            contextWindow={selectedModel.contextWindow}
+          />
+        </div>
+        <div className="px-6 pt-8 min-[1100px]:absolute min-[1100px]:inset-x-16 min-[1100px]:top-[110px] min-[1100px]:px-0 min-[1100px]:pt-0">
+          <CostHero
+            selectedModel={selectedModel}
+            inputTokens={total}
+            outputTokens={replyTokens}
+            requestsPerDay={requestsPerDay}
+            onRequestsPerDayChange={setRequestsPerDay}
+            currency={currency}
+            onSelectModel={setModelId}
+          />
+        </div>
+        <RequestFlow
+          sections={sections}
           model={selectedModel}
-          totalInputTokens={total}
-          tokensBySection={tokensBySection}
+          currency={currency}
           replyTokens={replyTokens}
+          onReplyTokensChange={setReplyTokens}
+          requestsPerDay={requestsPerDay}
+          suggestions={suggestions}
+          undoSectionId={undo?.sectionId ?? null}
+          hoveredSuggestion={hoveredSuggestion}
+          onHoverSuggestion={setHoveredSuggestionId}
+          onApply={handleApply}
+          onUndo={handleUndo}
         />
-
-        <main className="pb-16 pt-10">
-          <div
-            className="mx-auto grid gap-x-2"
-            style={{
-              gridTemplateColumns: gridColumns,
-              width: "fit-content",
-              maxWidth: "100%",
-            }}
-          >
-            {sections.map((section, index) => {
-              const row = index + 1;
-              const sectionNotes = suggestionsBySection.get(section.id) ?? [];
-              const showUndo = undo?.sectionId === section.id;
-              const trimHighlightIndices =
-                hoveredSuggestion?.sectionId === section.id
-                  ? charRangesToTokenIndices(
-                      section.tokens,
-                      hoveredSuggestion.ranges,
-                    )
-                  : undefined;
-
-              return (
-                <Fragment key={section.id}>
-                  <div
-                    className={index > 0 ? sectionSpacing : undefined}
-                    style={{ gridColumn: 1, gridRow: row }}
-                  >
-                    <MarginGutter
-                      sectionId={section.id}
-                      label={section.label}
-                      tokenCount={section.tokens.length}
-                      contentHeight={sectionHeights[section.id]}
-                    />
-                  </div>
-                  <div style={{ gridColumn: 2, gridRow: row }}>
-                    <EditablePromptSection
-                      text={section.text}
-                      tokens={section.tokens}
-                      onTextChange={section.setText}
-                      offset={index > 0}
-                      onHeightChange={makeHeightHandler(section.id)}
-                      trimHighlightIndices={trimHighlightIndices}
-                    />
-                  </div>
-                  <div
-                    className={`${index > 0 ? sectionSpacing : ""} flex flex-col gap-4`}
-                    style={{ gridColumn: 3, gridRow: row }}
-                  >
-                    {showUndo ? (
-                      <AppliedMarginNote onUndo={handleUndo} />
-                    ) : (
-                      sectionNotes.map((suggestion) => (
-                        <MarginNote
-                          key={suggestion.id}
-                          suggestion={suggestion}
-                          selectedModel={selectedModel}
-                          inputTokens={total}
-                          outputTokens={replyTokens}
-                          requestsPerDay={requestsPerDay}
-                          currency={currency}
-                          onApply={() => handleApply(suggestion)}
-                          onHoverChange={(hovered) =>
-                            setHoveredSuggestionId(
-                              hovered ? suggestion.id : null,
-                            )
-                          }
-                        />
-                      ))
-                    )}
-                  </div>
-                </Fragment>
-              );
-            })}
-
-            <div
-              className="sticky top-8 self-start"
-              style={{
-                gridColumn: 4,
-                gridRow: `1 / span ${ledgerRowSpan}`,
-              }}
-            >
-              <Ledger
-                selectedModel={selectedModel}
-                inputTokens={total}
-                outputTokens={replyTokens}
-                requestsPerDay={requestsPerDay}
-                onRequestsPerDayChange={setRequestsPerDay}
-                onReplyTokensChange={setReplyTokens}
-                currency={currency}
-                onSelectModel={setModelId}
-              />
-            </div>
-
-            <div style={{ gridColumn: 2, gridRow: sections.length + 1 }}>
-              <PromptFooter total={total} />
-            </div>
-          </div>
-        </main>
       </div>
     </div>
   );

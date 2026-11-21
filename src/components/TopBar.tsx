@@ -2,23 +2,23 @@
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 
-import { models, type ModelDefinition } from "@/data/models";
+import { models, type ModelDefinition, type TokenizerTier } from "@/data/models";
 import type { CostCurrency } from "@/lib/cost";
 
 function ChevronDown() {
   return (
     <svg
-      width="10"
-      height="10"
-      viewBox="0 0 10 10"
+      width="8"
+      height="8"
+      viewBox="0 0 8 8"
       fill="none"
       aria-hidden
       className="text-muted"
     >
       <path
-        d="M2 3.5L5 6.5L8 3.5"
+        d="M1.5 3L4 5.5L6.5 3"
         stroke="currentColor"
-        strokeWidth="1"
+        strokeWidth="1.2"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -26,11 +26,30 @@ function ChevronDown() {
   );
 }
 
+function tierLabel(tier: TokenizerTier): string {
+  return tier === "exact" ? "exact" : "est.";
+}
+
+function formatContextPercent(used: number, limit: number): string {
+  if (limit <= 0) return "0.0";
+  return (Math.round((used / limit) * 1000) / 10).toFixed(1);
+}
+
+const segmentShell =
+  "flex rounded-lg bg-white/[0.04] p-0.5 text-[12.5px] text-muted shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]";
+
+const segmentItem = "rounded-md px-[11px] py-[5px]";
+
+const segmentOn =
+  "bg-white/[0.09] text-text-hi shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]";
+
 type TopBarProps = {
   selectedModel: ModelDefinition;
   onSelectModel: (id: string) => void;
   currency: CostCurrency;
   onCurrencyChange: (currency: CostCurrency) => void;
+  usedTokens: number;
+  contextWindow: number;
 };
 
 export function TopBar({
@@ -38,6 +57,8 @@ export function TopBar({
   onSelectModel,
   currency,
   onCurrencyChange,
+  usedTokens,
+  contextWindow,
 }: TopBarProps) {
   const [open, setOpen] = useState(false);
   const [highlightIndex, setHighlightIndex] = useState(0);
@@ -46,15 +67,19 @@ export function TopBar({
   const listRef = useRef<HTMLUListElement>(null);
 
   const selectedIndex = models.findIndex((m) => m.id === selectedModel.id);
+  const percent = formatContextPercent(usedTokens, contextWindow);
 
   const close = useCallback(() => setOpen(false), []);
 
+  const openMenu = useCallback(() => {
+    setHighlightIndex(selectedIndex >= 0 ? selectedIndex : 0);
+    setOpen(true);
+  }, [selectedIndex]);
+
   useEffect(() => {
     if (!open) return;
-    const index = selectedIndex >= 0 ? selectedIndex : 0;
-    setHighlightIndex(index);
     listRef.current?.focus();
-  }, [open, selectedIndex]);
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -75,7 +100,7 @@ export function TopBar({
   const onTriggerKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
     if (event.key === "ArrowDown" || event.key === "Enter" || event.key === " ") {
       event.preventDefault();
-      setOpen(true);
+      openMenu();
     }
   };
 
@@ -103,44 +128,39 @@ export function TopBar({
   };
 
   return (
-    <header className="flex h-14 items-center justify-between border-b border-hairline px-6">
-      <div className="font-serif text-[22px] leading-none text-text">
-        <span className="font-normal not-italic">Token</span>
-        <span className="italic text-accent">scope</span>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <div
-          className="flex rounded-[var(--radius-control)] border border-hairline p-0.5"
-          role="group"
-          aria-label="View mode"
-        >
-          <button
-            type="button"
-            className="rounded-[4px] bg-surface px-3 py-1.5 font-mono text-[12px] text-text"
-          >
+    <header className="relative z-30 flex min-h-14 flex-wrap items-center justify-between gap-x-6 gap-y-3 py-3 min-[1100px]:h-14 min-[1100px]:flex-nowrap min-[1100px]:py-0">
+      <div className="flex items-center gap-8">
+        <div className="text-[14.5px] font-semibold tracking-[-0.01em] text-text-hi">
+          Tokenscope
+        </div>
+        <div className={segmentShell} role="group" aria-label="View mode">
+          <button type="button" className={`${segmentItem} ${segmentOn}`} aria-pressed>
             Inspect
           </button>
           <button
             type="button"
-            className="rounded-[4px] px-3 py-1.5 font-mono text-[12px] text-muted"
+            className={segmentItem}
+            disabled
+            aria-disabled="true"
           >
             Compare
           </button>
         </div>
+      </div>
 
-        <div
-          className="flex rounded-[var(--radius-control)] border border-hairline p-0.5"
-          role="group"
-          aria-label="Currency"
-        >
+      <div className="flex flex-wrap items-center gap-3.5">
+        <p className="font-mono text-[11.5px] whitespace-nowrap text-muted">
+          <span className="text-text">{usedTokens.toLocaleString("en-US")}</span>
+          {" / "}
+          {contextWindow.toLocaleString("en-US")}
+          {" · "}
+          {percent}%
+        </p>
+
+        <div className={segmentShell} role="group" aria-label="Currency">
           <button
             type="button"
-            className={`min-w-[36px] rounded-[4px] px-2 py-1.5 font-mono text-[12px] ${
-              currency === "INR"
-                ? "bg-surface text-text"
-                : "text-muted"
-            }`}
+            className={`${segmentItem} ${currency === "INR" ? segmentOn : ""}`}
             aria-pressed={currency === "INR"}
             onClick={() => onCurrencyChange("INR")}
           >
@@ -148,11 +168,7 @@ export function TopBar({
           </button>
           <button
             type="button"
-            className={`min-w-[36px] rounded-[4px] px-2 py-1.5 font-mono text-[12px] ${
-              currency === "USD"
-                ? "bg-surface text-text"
-                : "text-muted"
-            }`}
+            className={`${segmentItem} ${currency === "USD" ? segmentOn : ""}`}
             aria-pressed={currency === "USD"}
             onClick={() => onCurrencyChange("USD")}
           >
@@ -163,14 +179,18 @@ export function TopBar({
         <div ref={rootRef} className="relative">
           <button
             type="button"
-            className="flex items-center gap-2 rounded-[var(--radius-control)] border border-hairline bg-surface px-3 py-1.5 font-mono text-[12px] text-text-2"
+            className="flex h-[30px] items-center gap-2 rounded-lg bg-white/[0.04] pr-2.5 pl-3 text-[12.5px] text-text-hi shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)]"
             aria-haspopup="listbox"
             aria-expanded={open}
             aria-controls={listId}
-            onClick={() => setOpen((value) => !value)}
+            onClick={() => {
+              if (open) close();
+              else openMenu();
+            }}
             onKeyDown={onTriggerKeyDown}
           >
-            {selectedModel.name} · {selectedModel.tokenizer}
+            {selectedModel.name}
+            <span className="text-muted">{tierLabel(selectedModel.tokenizer)}</span>
             <ChevronDown />
           </button>
 
@@ -182,7 +202,7 @@ export function TopBar({
               aria-activedescendant={`${listId}-option-${highlightIndex}`}
               tabIndex={0}
               onKeyDown={onListKeyDown}
-              className="absolute right-0 z-50 mt-1 min-w-[220px] rounded-[var(--radius-control)] border border-hairline bg-surface py-1 shadow-none outline-none"
+              className="absolute right-0 z-50 mt-1.5 min-w-[240px] overflow-hidden rounded-lg bg-surface py-1 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06),0_16px_40px_-16px_rgba(0,0,0,0.6)] outline-none"
             >
               {models.map((model, index) => {
                 const selected = model.id === selectedModel.id;
@@ -196,8 +216,8 @@ export function TopBar({
                   >
                     <button
                       type="button"
-                      className={`flex w-full items-center justify-between gap-3 px-3 py-1.5 text-left font-mono text-[12px] ${
-                        highlighted ? "bg-token-hover text-text" : "text-text-2"
+                      className={`flex w-full items-center justify-between gap-4 px-3 py-2 text-left text-[12.5px] ${
+                        highlighted ? "bg-white/[0.06] text-text-hi" : "text-text"
                       }`}
                       onMouseEnter={() => setHighlightIndex(index)}
                       onClick={() => {
@@ -206,7 +226,7 @@ export function TopBar({
                       }}
                     >
                       <span>{model.name}</span>
-                      <span className="text-muted">{model.tokenizer}</span>
+                      <span className="text-muted">{tierLabel(model.tokenizer)}</span>
                     </button>
                   </li>
                 );
