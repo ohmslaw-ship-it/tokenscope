@@ -5,6 +5,7 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   type MouseEvent,
@@ -30,10 +31,12 @@ type HoveredToken = {
 function TokenLayer({
   tokens,
   hoveredIndex,
+  highlightIndices,
   layerRef,
 }: {
   tokens: PromptToken[];
   hoveredIndex: number | null;
+  highlightIndices: Set<number>;
   layerRef: RefObject<HTMLDivElement | null>;
 }) {
   return (
@@ -43,7 +46,8 @@ function TokenLayer({
       aria-hidden
     >
       {tokens.map((token, index) => {
-        const isHovered = hoveredIndex === index;
+        const isHovered =
+          hoveredIndex === index || highlightIndices.has(index);
 
         return (
           <span
@@ -82,6 +86,7 @@ interface EditablePromptSectionProps {
   onTextChange: (text: string) => void;
   offset?: boolean;
   onHeightChange?: (height: number) => void;
+  trimHighlightIndices?: number[];
 }
 
 export function EditablePromptSection({
@@ -90,12 +95,17 @@ export function EditablePromptSection({
   onTextChange,
   offset,
   onHeightChange,
+  trimHighlightIndices,
 }: EditablePromptSectionProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const layerRef = useRef<HTMLDivElement>(null);
   const rootRef = useRef<HTMLDivElement>(null);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [hoveredToken, setHoveredToken] = useState<HoveredToken | null>(null);
+  const highlightIndices = useMemo(
+    () => new Set(trimHighlightIndices ?? []),
+    [trimHighlightIndices],
+  );
 
   const syncHeight = useCallback(() => {
     const textarea = textareaRef.current;
@@ -178,6 +188,7 @@ export function EditablePromptSection({
         <TokenLayer
           tokens={tokens}
           hoveredIndex={hoveredIndex}
+          highlightIndices={highlightIndices}
           layerRef={layerRef}
         />
         <textarea
