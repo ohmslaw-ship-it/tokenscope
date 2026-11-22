@@ -27,7 +27,6 @@ import {
   SHARE_BAR_DURATION_S,
   SHARE_BAR_UPDATE_DURATION_S,
 } from "@/lib/entrance";
-import { billableOutputTokens } from "@/lib/billing";
 import {
   effectivePricesPerM,
   formatCostInteger,
@@ -227,8 +226,6 @@ export function CompareView({
 }: CompareViewProps) {
   const { pageReady, reducedMotion } = usePageEntranceContext();
   const symbol = currency === "INR" ? "₹" : "$";
-  const billableOutput = billableOutputTokens(inputTokens, outputTokens);
-
   const user = useMemo(
     () => sections.find((s) => s.id === "user"),
     [sections],
@@ -241,36 +238,36 @@ export function CompareView({
         amount: monthlyAmount(
           model,
           inputTokens,
-          billableOutput,
+          outputTokens,
           requestsPerDay,
           currency,
         ),
-        parts: requestCostParts(model, inputTokens, billableOutput),
+        parts: requestCostParts(model, inputTokens, outputTokens),
       }))
       .sort((a, b) => a.amount - b.amount || models.indexOf(a.model) - models.indexOf(b.model));
-  }, [inputTokens, billableOutput, requestsPerDay, currency]);
+  }, [inputTokens, outputTokens, requestsPerDay, currency]);
 
   const selectedAmount = useMemo(
     () =>
       monthlyAmount(
         selectedModel,
         inputTokens,
-        billableOutput,
+        outputTokens,
         requestsPerDay,
         currency,
       ),
-    [selectedModel, inputTokens, billableOutput, requestsPerDay, currency],
+    [selectedModel, inputTokens, outputTokens, requestsPerDay, currency],
   );
 
   const maxMonthlyUsd = useMemo(
     () =>
       Math.max(
         ...models.map((m) =>
-          monthlyCostUsd(m, inputTokens, billableOutput, requestsPerDay),
+          monthlyCostUsd(m, inputTokens, outputTokens, requestsPerDay),
         ),
         0,
       ),
-    [inputTokens, billableOutput, requestsPerDay],
+    [inputTokens, outputTokens, requestsPerDay],
   );
 
   const headline = useMemo(() => {
@@ -320,13 +317,13 @@ export function CompareView({
 
   const subline = useMemo(() => {
     const shares = models.map((m) =>
-      requestCostParts(m, inputTokens, billableOutput).replyShare,
+      requestCostParts(m, inputTokens, outputTokens).replyShare,
     );
     const minShare = shares.length > 0 ? Math.min(...shares) : 0;
     const floorPct = Math.floor(minShare * 1000) / 10;
     const roundedDown = Math.floor(floorPct / 10) * 10;
     return { roundedDown, showReplyNote: roundedDown >= 50 };
-  }, [inputTokens, billableOutput]);
+  }, [inputTokens, outputTokens]);
 
   const selectRow = useCallback(
     (id: string) => {
@@ -378,7 +375,7 @@ export function CompareView({
         <p className="text-[15px] leading-[23px] text-muted">
           Same <b className="font-medium text-text">{formatTokenCount(inputTokens)}</b>{" "}
           prompt and{" "}
-          <b className="font-medium text-text">{formatTokenCount(billableOutput)}</b>{" "}
+          <b className="font-medium text-text">{formatTokenCount(outputTokens)}</b>{" "}
           reply at{" "}
           <b className="font-medium text-text">
             {requestsPerDay.toLocaleString("en-US")}
@@ -422,7 +419,7 @@ export function CompareView({
             const rowUsd = monthlyCostUsd(
               row.model,
               inputTokens,
-              billableOutput,
+              outputTokens,
               requestsPerDay,
             );
             const widthShare =

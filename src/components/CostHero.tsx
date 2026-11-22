@@ -15,7 +15,6 @@ import {
   ENTRANCE_Y,
   ENTRANCE_DELAYS_MS,
 } from "@/lib/entrance";
-import { billableOutputTokens } from "@/lib/billing";
 import {
   clampRequestsPerDay,
   formatCostInteger,
@@ -54,29 +53,27 @@ export function CostHero({
 }: CostHeroProps) {
   const { pageReady, reducedMotion } = usePageEntranceContext();
   const symbol = currency === "INR" ? "₹" : "$";
-  const billableOutput = billableOutputTokens(inputTokens, outputTokens);
-
   const heroValue = useMemo(() => {
     const usd = monthlyCostUsd(
       selectedModel,
       inputTokens,
-      billableOutput,
+      outputTokens,
       requestsPerDay,
     );
     const amount = currency === "INR" ? usdToInr(usd) : usd;
     return Math.round(amount * 100) / 100;
-  }, [selectedModel, inputTokens, billableOutput, requestsPerDay, currency]);
+  }, [selectedModel, inputTokens, outputTokens, requestsPerDay, currency]);
 
   const replyShare = useMemo(() => {
-    const parts = requestCostParts(selectedModel, inputTokens, billableOutput);
+    const parts = requestCostParts(selectedModel, inputTokens, outputTokens);
     return Math.round(parts.replyShare * 1000) / 10;
-  }, [selectedModel, inputTokens, billableOutput]);
+  }, [selectedModel, inputTokens, outputTokens]);
 
   const rows = useMemo(() => {
     const selectedCost = monthlyDisplayValue(
       selectedModel,
       inputTokens,
-      billableOutput,
+      outputTokens,
       requestsPerDay,
       currency,
     );
@@ -86,14 +83,14 @@ export function CostHero({
         const cost = monthlyDisplayValue(
           model,
           inputTokens,
-          billableOutput,
+          outputTokens,
           requestsPerDay,
           currency,
         );
         return { model, cost, same: cost === selectedCost };
       })
       .sort((a, b) => a.cost - b.cost);
-  }, [selectedModel, inputTokens, billableOutput, requestsPerDay, currency]);
+  }, [selectedModel, inputTokens, outputTokens, requestsPerDay, currency]);
 
   return (
     <section className="flex flex-col gap-10 min-[1100px]:flex-row min-[1100px]:items-end min-[1100px]:justify-between min-[1100px]:gap-12">
