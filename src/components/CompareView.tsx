@@ -10,9 +10,12 @@ import {
 } from "react";
 
 import { EntranceBlock, usePageEntranceContext } from "@/components/PageEntrance";
+import { priceFootnoteText } from "@/components/PriceFootnote";
+import { ResetSampleLink } from "@/components/ResetSampleLink";
 import { SplitCostNumber } from "@/components/SplitCostNumber";
+import { TierLabel } from "@/components/TierLabel";
 import type { WorkspaceView } from "@/components/TopBar";
-import { models, type ModelDefinition, type TokenizerTier } from "@/data/models";
+import { models, type ModelDefinition } from "@/data/models";
 import type { TokenizedSection } from "@/hooks/useTokens";
 import {
   ENTRANCE_DURATION_S,
@@ -32,10 +35,6 @@ import {
   usdToInr,
   type CostCurrency,
 } from "@/lib/cost";
-
-function tierLabel(tier: TokenizerTier): string {
-  return tier === "exact" ? "exact" : "est.";
-}
 
 function formatTokenCount(value: number): string {
   return `${value.toLocaleString("en-US")}-token`;
@@ -81,6 +80,8 @@ type CompareViewProps = {
   onViewChange: (view: WorkspaceView) => void;
   costFlowReady: boolean;
   animateCostRoll: boolean;
+  showResetSample?: boolean;
+  onResetSample?: () => void;
 };
 
 function CompareCostBar({
@@ -218,6 +219,8 @@ export function CompareView({
   onViewChange,
   costFlowReady,
   animateCostRoll,
+  showResetSample,
+  onResetSample,
 }: CompareViewProps) {
   const { pageReady, reducedMotion } = usePageEntranceContext();
   const symbol = currency === "INR" ? "₹" : "$";
@@ -459,7 +462,7 @@ export function CompareView({
                         {row.model.name}
                       </span>
                       <span className="ml-2 font-mono text-[11px] font-normal text-faint">
-                        {tierLabel(row.model.tokenizer)}
+                        <TierLabel tier={row.model.tokenizer} />
                       </span>
                     </div>
                     {selected ? (
@@ -503,7 +506,7 @@ export function CompareView({
                       <p className="text-[16px] font-medium tracking-[-0.01em] text-text">
                         {row.model.name}
                         <span className="ml-2 font-mono text-[11px] font-normal text-faint">
-                          {tierLabel(row.model.tokenizer)}
+                          <TierLabel tier={row.model.tokenizer} />
                         </span>
                       </p>
                       {selected ? (
@@ -561,8 +564,18 @@ export function CompareView({
         delayMs={ENTRANCE_DELAYS_MS.compareFooter}
         className="mt-6 text-[12.5px] text-faint min-[1100px]:absolute min-[1100px]:left-5 min-[1100px]:top-[clamp(728px,calc(728px+(100vh-900px)*0.5),812px)] min-[1100px]:mt-0"
       >
-        Click a model to select it and open it in Inspect. System prompt and examples
-        are edited in Inspect.
+        <span>
+          Click a model to select it and open it in Inspect. System prompt and examples
+          are edited in Inspect.
+          {showResetSample && onResetSample ? (
+            <>
+              {" · "}
+              <ResetSampleLink onReset={onResetSample} className="inline" />
+            </>
+          ) : null}
+          {" · "}
+          {priceFootnoteText()}
+        </span>
       </EntranceBlock>
     </section>
   );

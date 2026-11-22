@@ -7,6 +7,7 @@ import { InlineEditableNumber } from "@/components/InlineEditableNumber";
 import { SplitCostNumber } from "@/components/SplitCostNumber";
 import { ENTRANCE_DELAYS_MS } from "@/lib/entrance";
 import { AppliedMarginNote, MarginNote } from "@/components/MarginNote";
+import { ResetSampleLink } from "@/components/ResetSampleLink";
 import { EditablePromptSection } from "@/components/PromptDocument";
 import type { ModelDefinition } from "@/data/models";
 import type { SectionId } from "@/data/sample";
@@ -53,6 +54,13 @@ function PanelHeader({
   );
 }
 
+function middlePanelTitle(label1: string, label2: string): string {
+  if (/^Example\s+\d+$/i.test(label1) && /^Example\s+\d+$/i.test(label2)) {
+    return "Examples";
+  }
+  return `${label1} & ${label2}`;
+}
+
 function exampleName(text: string, fallback: string): string {
   const match = text.match(/^Example\s+\d+\s*[-–—]\s*([^.!\n]+)/i);
   if (!match) return fallback;
@@ -75,6 +83,8 @@ type RequestFlowProps = {
   onUndo: () => void;
   costFlowReady: boolean;
   animateCostRoll: boolean;
+  showResetSample?: boolean;
+  onResetSample?: () => void;
 };
 
 export function RequestFlow({
@@ -92,6 +102,8 @@ export function RequestFlow({
   onUndo,
   costFlowReady,
   animateCostRoll,
+  showResetSample,
+  onResetSample,
 }: RequestFlowProps) {
   const [userFocused, setUserFocused] = useState(false);
   const symbol = currency === "INR" ? "₹" : "$";
@@ -161,13 +173,21 @@ export function RequestFlow({
     ? "shadow-[inset_0_0_0_1px_rgba(124,196,224,0.55),inset_0_1px_0_rgba(255,255,255,0.1),0_16px_40px_-16px_rgba(0,0,0,0.6)]"
     : "shadow-[inset_0_0_0_1px_rgba(124,196,224,0.32),inset_0_1px_0_rgba(255,255,255,0.08),0_16px_40px_-16px_rgba(0,0,0,0.6)]";
 
+  const middleTitle = middlePanelTitle(example1.label, example2.label);
+
   return (
-    <section className="mt-12 grid grid-cols-1 gap-5 px-6 pb-8 min-[700px]:max-[1099px]:grid-cols-2 min-[1100px]:absolute min-[1100px]:inset-x-16 min-[1100px]:top-[404px] min-[1100px]:bottom-6 min-[1100px]:mt-0 min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_250px] min-[1100px]:grid-rows-[minmax(0,1fr)] min-[1100px]:px-0 min-[1100px]:pb-0">
+    <section className="mt-12 px-6 pb-8 min-[1100px]:absolute min-[1100px]:inset-x-16 min-[1100px]:top-[404px] min-[1100px]:bottom-6 min-[1100px]:mt-0 min-[1100px]:px-0 min-[1100px]:pb-0">
+      {showResetSample && onResetSample ? (
+        <div className="mb-3 flex justify-end min-[1100px]:mb-2">
+          <ResetSampleLink onReset={onResetSample} />
+        </div>
+      ) : null}
+      <div className="grid grid-cols-1 gap-5 min-[700px]:max-[1099px]:grid-cols-2 min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_250px] min-[1100px]:grid-rows-[minmax(0,1fr)] min-[1100px]:h-full">
       <EntranceBlock
         delayMs={ENTRANCE_DELAYS_MS.panelSystem}
         className={`${panelFrame} ${panelSurface}`}
       >
-        <PanelHeader title="System" count={system.tokens.length} />
+        <PanelHeader title={system.label} count={system.tokens.length} />
         <AnimatedShareBar share={shareFor(system.tokens.length)} />
         <div className="relative mt-[30px] -mx-6 min-h-0 flex-1 max-[1099px]:h-[340px] max-[1099px]:flex-none">
           <div className="absolute inset-0">
@@ -176,7 +196,7 @@ export function RequestFlow({
               tokens={system.tokens}
               onTextChange={system.setText}
               trimHighlightIndices={highlightsFor(system)}
-              ariaLabel="System prompt"
+              ariaLabel={system.label}
               fadeTo="#0F1A33"
               bleed
             />
@@ -190,7 +210,7 @@ export function RequestFlow({
         className={`${panelFrame} ${panelSurface}`}
       >
         <PanelHeader
-          title="Examples"
+          title={middleTitle}
           count={example1.tokens.length + example2.tokens.length}
         />
         <AnimatedShareBar
@@ -206,7 +226,9 @@ export function RequestFlow({
             <div key={section.id}>
               <div className="mb-1.5 flex items-baseline justify-between gap-3">
                 <h3 className="text-[13px] text-text">
-                  {exampleName(section.text, fallback)}
+                  {/^Example\s+\d+$/i.test(section.label)
+                    ? exampleName(section.text, fallback)
+                    : section.label}
                 </h3>
                 <span className="font-mono text-[11px] text-muted">
                   {section.tokens.length.toLocaleString("en-US")}
@@ -233,7 +255,7 @@ export function RequestFlow({
         delayMs={ENTRANCE_DELAYS_MS.panelUser}
         className={`${panelFrame} max-[639px]:min-h-0 bg-[linear-gradient(180deg,#172A50,#111F3E_60%)] ${userShadow}`}
       >
-        <PanelHeader title="User message" count={user.tokens.length} />
+        <PanelHeader title={user.label} count={user.tokens.length} />
         <AnimatedShareBar share={shareFor(user.tokens.length)} />
         <div className="relative mt-[22px] -mx-6 min-h-0 flex-1 max-[639px]:h-auto max-[639px]:min-h-[180px] max-[639px]:flex-none min-[640px]:max-[1099px]:h-[280px] min-[640px]:max-[1099px]:flex-none">
           <div className="absolute inset-0">
@@ -244,7 +266,7 @@ export function RequestFlow({
               trimHighlightIndices={highlightsFor(user)}
               tone="user"
               placeholder="Type a customer message…"
-              ariaLabel="User message"
+              ariaLabel={user.label}
               fadeTo="#111F3E"
               bleed
               onFocusChange={setUserFocused}
@@ -284,6 +306,7 @@ export function RequestFlow({
         </div>
         <p className="mt-2 text-[12.5px] text-muted">per month</p>
       </EntranceBlock>
+      </div>
     </section>
   );
 }

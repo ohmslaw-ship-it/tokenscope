@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { useMemo } from "react";
 
 import { EntranceBlock, usePageEntranceContext } from "@/components/PageEntrance";
+import { PriceFootnote } from "@/components/PriceFootnote";
 import { InlineEditableNumber } from "@/components/InlineEditableNumber";
 import { SplitCostNumber } from "@/components/SplitCostNumber";
 import { models, type ModelDefinition } from "@/data/models";
@@ -127,6 +128,7 @@ export function CostHero({
         {selectedModel.priceNote ? (
           <p className="mt-2 text-[13px] text-muted">{selectedModel.priceNote}</p>
         ) : null}
+        <PriceFootnote className="mt-4 min-[1100px]:mt-5" />
       </EntranceBlock>
 
       <div className="w-full shrink-0 min-[1100px]:w-[280px]">
