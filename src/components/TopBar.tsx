@@ -292,7 +292,7 @@ export function TopBar({
             onKeyDown={onModelTriggerKeyDown}
           >
             {selectedModel.name}{" "}
-            <TierLabel tier={selectedModel.tokenizer} />
+            <TierLabel tier={selectedModel.tokenizer} placement="bottom" />
             <ChevronDown />
           </button>
 
@@ -328,7 +328,7 @@ export function TopBar({
                       }}
                     >
                       <span>{model.name}</span>
-                      <TierLabel tier={model.tokenizer} />
+                      <TierLabel tier={model.tokenizer} placement="bottom" />
                     </button>
                   </li>
                 );

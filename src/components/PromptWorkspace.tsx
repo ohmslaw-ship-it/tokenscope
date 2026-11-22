@@ -81,7 +81,7 @@ export function PromptWorkspace() {
   const selectedModel = getModelById(modelId);
 
   const promptSectionsForAnalyze = useMemo(
-    () => sections.map(({ id, label, text }) => ({ id, label, text })),
+    () => sections.map(({ id, label, text, cuttable }) => ({ id, label, text, cuttable })),
     [sections],
   );
 

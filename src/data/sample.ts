@@ -4,6 +4,8 @@ export interface PromptSection {
   id: SectionId;
   label: string;
   text: string;
+  /** Few-shot example sections that support “cut this example” trim suggestions. */
+  cuttable?: boolean;
 }
 
 export type SamplePreset = {
@@ -276,11 +278,13 @@ export const samplePresets: SamplePreset[] = [
       {
         id: "example1",
         label: "Example 1",
+        cuttable: true,
         text: "Customer: My order NW-18422 was supposed to arrive Tuesday and it still isn't here. This is the second time this month. Assistant: I'm sorry you've had to wait again, especially after the last delay. I can see NW-18422 left the warehouse on 12 Nov and is with the courier, last scanned in Pune this morning. Current estimate is tomorrow by 6pm. I've added a ₹200 credit to your account for the wait. If it doesn't arrive tomorrow, write back and I'll raise a priority trace.",
       },
       {
         id: "example2",
         label: "Example 2",
+        cuttable: true,
         text: "Customer: I want a refund for order NW-19005. I unboxed it yesterday and two of the mugs arrived cracked. Assistant: I'm sorry those mugs arrived damaged. Because NW-19005 was delivered yesterday, you're within the 30-day window and I'll process a full refund for the cracked items. Please keep the rest of the set. A return label is on its way to your email; once the courier scans it, the refund should reach your original payment method in 5-7 days.",
       },
       {

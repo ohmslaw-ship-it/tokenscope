@@ -1,6 +1,7 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 import type { TokenizerTier } from "@/data/models";
 
@@ -15,16 +16,51 @@ const TIER_COPY: Record<TokenizerTier, { label: string; tip: string }> = {
   },
 };
 
-export function TierLabel({ tier }: { tier: TokenizerTier }) {
+const TIP_MAX_WIDTH = 280;
+const VIEWPORT_PAD = 16;
+const TIP_GAP = 8;
+
+type TierLabelProps = {
+  tier: TokenizerTier;
+  placement?: "top" | "bottom";
+};
+
+export function TierLabel({ tier, placement = "top" }: TierLabelProps) {
   const [open, setOpen] = useState(false);
   const tipId = useId();
+  const triggerRef = useRef<HTMLSpanElement>(null);
+  const [tipPos, setTipPos] = useState<{ top: number; left: number; width: number } | null>(
+    null,
+  );
   const { label, tip } = TIER_COPY[tier];
 
+  useLayoutEffect(() => {
+    if (!open || !triggerRef.current) {
+      setTipPos(null);
+      return;
+    }
+
+    const rect = triggerRef.current.getBoundingClientRect();
+    const width = Math.min(TIP_MAX_WIDTH, window.innerWidth - VIEWPORT_PAD * 2);
+    const nearRight = rect.right > window.innerWidth - VIEWPORT_PAD - width * 0.35;
+
+    let left = nearRight
+      ? rect.right - width
+      : rect.left + rect.width / 2 - width / 2;
+    left = Math.max(VIEWPORT_PAD, Math.min(left, window.innerWidth - VIEWPORT_PAD - width));
+
+    const top =
+      placement === "bottom" ? rect.bottom + TIP_GAP : rect.top - TIP_GAP;
+
+    setTipPos({ top, left, width });
+  }, [open, placement]);
+
   return (
-    <span className="relative inline-flex">
-      <button
-        type="button"
-        className="cursor-help rounded-sm text-muted underline decoration-white/20 decoration-dotted underline-offset-[3px] outline-none hover:text-text focus-visible:text-text focus-visible:decoration-accent/50"
+    <>
+      <span
+        ref={triggerRef}
+        tabIndex={0}
+        className="relative inline-flex cursor-help rounded-sm text-muted underline decoration-white/20 decoration-dotted underline-offset-[3px] outline-none hover:text-text focus-visible:text-text focus-visible:decoration-accent/50"
         aria-describedby={open ? tipId : undefined}
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
@@ -32,16 +68,25 @@ export function TierLabel({ tier }: { tier: TokenizerTier }) {
         onBlur={() => setOpen(false)}
       >
         {label}
-      </button>
-      {open ? (
-        <span
-          id={tipId}
-          role="tooltip"
-          className="absolute bottom-full left-1/2 z-[60] mb-2 w-[min(280px,calc(100vw-32px))] -translate-x-1/2 rounded-lg bg-[#1C2C4F] px-3 py-2 text-left text-[11px] font-normal leading-[1.45] tracking-normal text-text shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08),0_8px_20px_rgba(0,0,0,0.45)]"
-        >
-          {tip}
-        </span>
-      ) : null}
-    </span>
+      </span>
+      {open && tipPos
+        ? createPortal(
+            <span
+              id={tipId}
+              role="tooltip"
+              className="pointer-events-none fixed z-[80] rounded-lg bg-[#1C2C4F] px-3 py-2 text-left text-[11px] font-normal leading-[1.45] tracking-normal text-text shadow-[inset_0_0_0_1px_rgba(255,255,255,0.08),0_8px_20px_rgba(0,0,0,0.45)]"
+              style={{
+                top: tipPos.top,
+                left: tipPos.left,
+                width: tipPos.width,
+                transform: placement === "top" ? "translateY(-100%)" : undefined,
+              }}
+            >
+              {tip}
+            </span>,
+            document.body,
+          )
+        : null}
+    </>
   );
 }

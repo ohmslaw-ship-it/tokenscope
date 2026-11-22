@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import {
   defaultPresetId,
@@ -69,11 +69,15 @@ export function useTokens(options?: UseTokensOptions) {
 
   const activePreset = getPresetById(presetId) ?? getPresetById(defaultPresetId)!;
   const sectionMeta = useMemo(() => {
-    const labels = labelsFromPreset(presetId);
-    return SECTION_IDS.map((id) => ({
-      id,
-      label: labels[id],
-    }));
+    const preset = getPresetById(presetId) ?? getPresetById(defaultPresetId)!;
+    return SECTION_IDS.map((id) => {
+      const section = preset.sections.find((s) => s.id === id);
+      return {
+        id,
+        label: section?.label ?? labelsFromPreset(presetId)[id],
+        cuttable: section?.cuttable,
+      };
+    });
   }, [presetId]);
 
   const isEdited = useMemo(
@@ -84,7 +88,7 @@ export function useTokens(options?: UseTokensOptions) {
   const onRestoreRef = useRef(options?.onRestore);
   onRestoreRef.current = options?.onRestore;
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const saved = loadPersistedWorkspace();
     if (saved) {
       setPresetId(saved.presetId);

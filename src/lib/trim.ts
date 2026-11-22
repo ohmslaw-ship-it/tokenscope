@@ -358,12 +358,15 @@ function findRepeatSuggestions(sections: PromptSection[]): Suggestion[] {
   return out;
 }
 
-function isExampleSection(section: PromptSection): boolean {
-  return section.id === "example1" || section.id === "example2";
+function isCuttableExample(section: PromptSection): boolean {
+  return (
+    (section.id === "example1" || section.id === "example2") &&
+    section.cuttable === true
+  );
 }
 
 function findExampleSuggestions(sections: PromptSection[]): Suggestion[] {
-  const examples = sections.filter(isExampleSection);
+  const examples = sections.filter(isCuttableExample);
   if (examples.length < 2) return [];
 
   const pairs: {
