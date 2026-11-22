@@ -1,9 +1,9 @@
 "use client";
 
-import NumberFlow from "@number-flow/react";
 import { useMemo, useState } from "react";
 
 import { InlineEditableNumber } from "@/components/InlineEditableNumber";
+import { SplitCostNumber } from "@/components/SplitCostNumber";
 import { AppliedMarginNote, MarginNote } from "@/components/MarginNote";
 import { EditablePromptSection } from "@/components/PromptDocument";
 import type { ModelDefinition } from "@/data/models";
@@ -14,7 +14,6 @@ import {
   displayValueFromMonthlyUsd,
   inputSectionShare,
   monthlyUSD,
-  numberFlowFormat,
   requestCostParts,
   type CostCurrency,
 } from "@/lib/cost";
@@ -134,11 +133,6 @@ export function RequestFlow({
     const usd = monthlyUSD(parts.outputUsd, requestsPerDay);
     return displayValueFromMonthlyUsd(usd, currency);
   }, [parts.outputUsd, requestsPerDay, currency]);
-
-  const replyFormat = useMemo(
-    () => numberFlowFormat(currency, replyValue),
-    [currency, replyValue],
-  );
 
   const shareFor = (tokens: number) => inputSectionShare(parts, tokens, inputTokens);
 
@@ -281,16 +275,14 @@ export function RequestFlow({
           />{" "}
           tokens.
         </p>
-        <div className="reply-cost-slot mt-5 text-[40px] text-text">
-          <p className="reply-cost cost-tabular">
-            <span className="reply-cost-symbol">{symbol}</span>
-            <NumberFlow
-              value={costsReady ? replyValue : 0}
-              locales="en-US"
-              format={replyFormat}
-              willChange
-            />
-          </p>
+        <div className="mt-5 text-[40px] text-text">
+          <SplitCostNumber
+            amount={replyValue}
+            currency={currency}
+            costsReady={costsReady}
+            symbol={symbol}
+            variant="reply"
+          />
         </div>
         <p className="mt-2 text-[12.5px] text-muted">per month</p>
       </article>

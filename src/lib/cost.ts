@@ -197,6 +197,28 @@ export function formatCostDelta(
   return `${sign}${symbol}${formatted}`;
 }
 
+export function splitCostAmount(amount: number): {
+  whole: number;
+  fraction: number;
+} {
+  const rounded = Math.round(amount * 100) / 100;
+  const whole = Math.trunc(rounded);
+  const fraction = Math.round(Math.abs(rounded) * 100) % 100;
+  return { whole, fraction };
+}
+
+export function costFlowLocale(currency: CostCurrency): string {
+  return currency === "INR" ? "en-IN" : "en-US";
+}
+
+/** Reply panel shows a separate cents flow only for small USD amounts. */
+export function costFlowUsesDecimals(
+  currency: CostCurrency,
+  value: number,
+): boolean {
+  return currency === "USD" && value < 1_000;
+}
+
 export type NumberFlowFormat = {
   minimumFractionDigits?: number;
   maximumFractionDigits?: number;

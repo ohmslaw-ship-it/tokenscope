@@ -38,6 +38,8 @@ body {
 }
 
 .hero-cost-slot {
+  display: inline-block;
+  flex: none;
   height: 1em;
   line-height: 1;
   overflow: clip;
@@ -57,7 +59,7 @@ body {
   letter-spacing: -0.05em;
 }
 
-.hero-cost number-flow-react {
+.hero-cost-slot number-flow-react {
   font-weight: 600;
   line-height: 1;
   letter-spacing: 0;
@@ -65,16 +67,28 @@ body {
   margin-block: calc(var(--number-flow-mask-height, 0.25em) * -1);
 }
 
-.hero-cost number-flow-react::part(fraction) {
+.hero-cost-frac-slot {
+  display: inline-block;
+  flex: none;
   margin-left: 4px;
   font-size: 0.293em;
   font-weight: 500;
-  letter-spacing: 0;
   color: var(--color-muted);
+  height: 1em;
+  line-height: 1;
+  overflow: clip;
   font-variant-numeric: tabular-nums;
 }
 
+.hero-cost-frac-slot number-flow-react {
+  line-height: 1;
+  letter-spacing: 0;
+  margin-block: calc(var(--number-flow-mask-height, 0.25em) * -1);
+}
+
 .reply-cost-slot {
+  display: inline-block;
+  flex: none;
   height: 1em;
   line-height: 1;
   overflow: clip;
@@ -99,6 +113,25 @@ body {
   line-height: 1;
   vertical-align: baseline;
   font-variant-numeric: tabular-nums;
+  margin-block: calc(var(--number-flow-mask-height, 0.25em) * -1);
+}
+
+.reply-cost-frac-slot {
+  display: inline-block;
+  flex: none;
+  margin-left: 4px;
+  font-size: 0.293em;
+  font-weight: 500;
+  color: var(--color-muted);
+  height: 1em;
+  line-height: 1;
+  overflow: clip;
+  font-variant-numeric: tabular-nums;
+}
+
+.reply-cost-frac-slot number-flow-react {
+  line-height: 1;
+  letter-spacing: 0;
   margin-block: calc(var(--number-flow-mask-height, 0.25em) * -1);
 }
 

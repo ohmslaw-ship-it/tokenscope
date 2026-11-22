@@ -1,9 +1,9 @@
 "use client";
 
-import NumberFlow from "@number-flow/react";
 import { useMemo } from "react";
 
 import { InlineEditableNumber } from "@/components/InlineEditableNumber";
+import { SplitCostNumber } from "@/components/SplitCostNumber";
 import { models, type ModelDefinition } from "@/data/models";
 import {
   clampRequestsPerDay,
@@ -84,18 +84,16 @@ export function CostHero({
     <section className="flex flex-col gap-10 min-[1100px]:flex-row min-[1100px]:items-end min-[1100px]:justify-between min-[1100px]:gap-12">
       <div className="min-w-0">
         <div
-          className="hero-cost-slot text-text-hi"
+          className="text-text-hi"
           style={{ fontSize: "clamp(32px, 10.5vw, 150px)" }}
         >
-          <p className="hero-cost cost-tabular">
-            <span className="hero-cost-symbol">{symbol}</span>
-            <NumberFlow
-              value={costsReady ? heroValue : 0}
-              locales="en-US"
-              format={{ minimumFractionDigits: 2, maximumFractionDigits: 2 }}
-              willChange
-            />
-          </p>
+          <SplitCostNumber
+            amount={heroValue}
+            currency={currency}
+            costsReady={costsReady}
+            symbol={symbol}
+            variant="hero"
+          />
         </div>
         <p className="mt-[24px] text-[15px] text-muted">
           per month on{" "}
