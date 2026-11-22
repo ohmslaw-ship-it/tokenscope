@@ -244,7 +244,7 @@ export function EditablePromptSection({
 
   return (
     <div className={mode === "fill" ? "relative h-full min-h-[48px]" : "relative"}>
-      <div ref={scrollerRef} className={scrollerClass}>
+      <div ref={scrollerRef} className={`prompt-editor-shell ${scrollerClass}`}>
         <div className={`grid ${focused ? "pb-4" : ""}`}>
           <div
             ref={layerRef}

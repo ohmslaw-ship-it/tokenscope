@@ -1,36 +1,38 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Tokenscope
 
-## Getting Started
+Tokenscope is a browser tool for seeing what an LLM prompt costs before it ships. Paste or load a sample prompt, watch tokens update live, and compare monthly spend across models. Live demo: [tokenscope-murex.vercel.app](https://tokenscope-murex.vercel.app).
 
-First, run the development server:
+![Tokenscope inspect view](docs/screenshot.png)
+
+## Features
+
+- **Inspect** — Live token breakdown by section, monthly cost at your request volume, and trim suggestions that estimate savings.
+- **Compare** — Same prompt and reply length across five models, with relative cost bars and per-million rates (including long-context tiers when input crosses the threshold).
+- **Sample presets** — Support-bot and other ready-made prompts to explore without starting from scratch.
+- **Saved in the browser** — Model, currency, volume, edits, and preset choice persist locally (no account).
+
+## How it works
+
+Token counts use **gpt-tokenizer** (`o200k_base`) inside a **Web Worker**, debounced so large pastes stay responsive while you type. **GPT-5.6 Terra** uses the exact tokenizer; other models use the same token stream with an “estimated” label.
+
+Prices are per 1M input and output tokens from [`src/data/models.ts`](src/data/models.ts), with an “as of” date in the UI. INR amounts use a fixed USD→INR rate. Monthly cost assumes a **30-day month** and your chosen requests per day. OpenAI-style models switch to **long-context rates** when input tokens exceed **272,000**.
+
+## Tech stack
+
+Next.js (App Router), TypeScript, Tailwind CSS v4, Motion, and NumberFlow for animated figures.
+
+## Run locally
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Limitations
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Token counts for non–GPT-5.6 Terra models are estimates, not provider-native counts.
+- Published list prices change; the app uses a snapshot date and fictional model names for the demo.
+- Trim suggestions are heuristics, not guaranteed production-safe edits.
+- Long-context and promo pricing rules are simplified to what is encoded in `models.ts`.

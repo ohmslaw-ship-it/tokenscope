@@ -27,6 +27,7 @@ import {
   SHARE_BAR_DURATION_S,
   SHARE_BAR_UPDATE_DURATION_S,
 } from "@/lib/entrance";
+import { billableOutputTokens } from "@/lib/billing";
 import {
   effectivePricesPerM,
   formatCostInteger,
@@ -160,15 +161,17 @@ function CompareUserField({
           {tokenCount.toLocaleString("en-US")} tokens
         </p>
       </div>
-      <textarea
-        ref={textareaRef}
-        value={text}
-        onChange={(e) => onTextChange(e.target.value)}
-        rows={1}
-        aria-label="User message"
-        className="ink-scroll max-h-[46px] min-h-[23px] w-full resize-none border-0 bg-transparent font-mono text-[13.5px] leading-[23px] text-text-hi outline-none placeholder:text-muted focus-visible:outline-none"
-        onInput={resize}
-      />
+      <div className="prompt-editor-shell rounded-sm">
+        <textarea
+          ref={textareaRef}
+          value={text}
+          onChange={(e) => onTextChange(e.target.value)}
+          rows={1}
+          aria-label="User message"
+          className="ink-scroll max-h-[46px] min-h-[23px] w-full resize-none border-0 bg-transparent font-mono text-[13.5px] leading-[23px] text-text-hi outline-none placeholder:text-muted"
+          onInput={resize}
+        />
+      </div>
     </div>
   );
 }
@@ -224,6 +227,7 @@ export function CompareView({
 }: CompareViewProps) {
   const { pageReady, reducedMotion } = usePageEntranceContext();
   const symbol = currency === "INR" ? "₹" : "$";
+  const billableOutput = billableOutputTokens(inputTokens, outputTokens);
 
   const user = useMemo(
     () => sections.find((s) => s.id === "user"),
@@ -237,40 +241,46 @@ export function CompareView({
         amount: monthlyAmount(
           model,
           inputTokens,
-          outputTokens,
+          billableOutput,
           requestsPerDay,
           currency,
         ),
-        parts: requestCostParts(model, inputTokens, outputTokens),
+        parts: requestCostParts(model, inputTokens, billableOutput),
       }))
       .sort((a, b) => a.amount - b.amount || models.indexOf(a.model) - models.indexOf(b.model));
-  }, [inputTokens, outputTokens, requestsPerDay, currency]);
+  }, [inputTokens, billableOutput, requestsPerDay, currency]);
 
   const selectedAmount = useMemo(
     () =>
       monthlyAmount(
         selectedModel,
         inputTokens,
-        outputTokens,
+        billableOutput,
         requestsPerDay,
         currency,
       ),
-    [selectedModel, inputTokens, outputTokens, requestsPerDay, currency],
+    [selectedModel, inputTokens, billableOutput, requestsPerDay, currency],
   );
 
   const maxMonthlyUsd = useMemo(
     () =>
       Math.max(
         ...models.map((m) =>
-          monthlyCostUsd(m, inputTokens, outputTokens, requestsPerDay),
+          monthlyCostUsd(m, inputTokens, billableOutput, requestsPerDay),
         ),
+        0,
       ),
-    [inputTokens, outputTokens, requestsPerDay],
+    [inputTokens, billableOutput, requestsPerDay],
   );
 
   const headline = useMemo(() => {
     const cheapest = rows[0];
     if (!cheapest) return null;
+
+    const allSameCost = rows.every((row) => row.amount === cheapest.amount);
+    if (allSameCost) {
+      return { kind: "allSame" as const };
+    }
 
     const cheapestIsSelected = cheapest.model.id === selectedModel.id;
 
@@ -309,15 +319,14 @@ export function CompareView({
   }, [rows, selectedModel, selectedAmount, currency, symbol]);
 
   const subline = useMemo(() => {
-    const minShare = Math.min(
-      ...models.map(
-        (m) => requestCostParts(m, inputTokens, outputTokens).replyShare,
-      ),
+    const shares = models.map((m) =>
+      requestCostParts(m, inputTokens, billableOutput).replyShare,
     );
+    const minShare = shares.length > 0 ? Math.min(...shares) : 0;
     const floorPct = Math.floor(minShare * 1000) / 10;
     const roundedDown = Math.floor(floorPct / 10) * 10;
     return { roundedDown, showReplyNote: roundedDown >= 50 };
-  }, [inputTokens, outputTokens]);
+  }, [inputTokens, billableOutput]);
 
   const selectRow = useCallback(
     (id: string) => {
@@ -343,7 +352,9 @@ export function CompareView({
         className="max-w-[980px] min-[1100px]:absolute min-[1100px]:left-0 min-[1100px]:top-0"
       >
         <h1 className="text-[32px] font-semibold tracking-[-0.035em] text-text-hi min-[640px]:text-[40px] min-[640px]:leading-[1.08]">
-          {headline?.kind === "otherCheapest" ? (
+          {headline?.kind === "allSame" ? (
+            "Every model costs the same for this prompt."
+          ) : headline?.kind === "otherCheapest" ? (
             <>
               <span className="text-accent-soft">{headline.name}</span> runs this prompt for
               <br />
@@ -367,7 +378,7 @@ export function CompareView({
         <p className="text-[15px] leading-[23px] text-muted">
           Same <b className="font-medium text-text">{formatTokenCount(inputTokens)}</b>{" "}
           prompt and{" "}
-          <b className="font-medium text-text">{formatTokenCount(outputTokens)}</b>{" "}
+          <b className="font-medium text-text">{formatTokenCount(billableOutput)}</b>{" "}
           reply at{" "}
           <b className="font-medium text-text">
             {requestsPerDay.toLocaleString("en-US")}
@@ -411,7 +422,7 @@ export function CompareView({
             const rowUsd = monthlyCostUsd(
               row.model,
               inputTokens,
-              outputTokens,
+              billableOutput,
               requestsPerDay,
             );
             const widthShare =
@@ -434,7 +445,8 @@ export function CompareView({
                 type="button"
                 onClick={() => selectRow(row.model.id)}
                 onKeyDown={onRowKeyDown(row.model.id)}
-                className={`group w-full text-left transition-colors hover:bg-white/[0.04] focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-0 focus-visible:outline-accent/70 ${rowShell} ${
+                aria-pressed={selected}
+                className={`group w-full text-left transition-colors hover:bg-white/[0.04] ${rowShell} ${
                   prevSelected ? "border-t-transparent" : ""
                 } last:border-b last:border-white/[0.06]`}
                 initial={{ opacity: 0, y: reducedMotion ? 0 : ENTRANCE_Y }}
@@ -496,6 +508,7 @@ export function CompareView({
                       animateRoll={animateCostRoll}
                       symbol={symbol}
                       variant="compare"
+                      announceLabel={`${row.model.name} monthly cost`}
                     />
                   </div>
                 </div>
@@ -524,6 +537,7 @@ export function CompareView({
                       animateRoll={animateCostRoll}
                       symbol={symbol}
                       variant="compare"
+                      announceLabel={`${row.model.name} monthly cost`}
                     />
                   </div>
                   <CompareCostBar widthShare={widthShare} inputShare={inputShare} />

@@ -15,6 +15,7 @@ import {
   ENTRANCE_Y,
   ENTRANCE_DELAYS_MS,
 } from "@/lib/entrance";
+import { billableOutputTokens } from "@/lib/billing";
 import {
   clampRequestsPerDay,
   formatCostInteger,
@@ -53,28 +54,29 @@ export function CostHero({
 }: CostHeroProps) {
   const { pageReady, reducedMotion } = usePageEntranceContext();
   const symbol = currency === "INR" ? "₹" : "$";
+  const billableOutput = billableOutputTokens(inputTokens, outputTokens);
 
   const heroValue = useMemo(() => {
     const usd = monthlyCostUsd(
       selectedModel,
       inputTokens,
-      outputTokens,
+      billableOutput,
       requestsPerDay,
     );
     const amount = currency === "INR" ? usdToInr(usd) : usd;
     return Math.round(amount * 100) / 100;
-  }, [selectedModel, inputTokens, outputTokens, requestsPerDay, currency]);
+  }, [selectedModel, inputTokens, billableOutput, requestsPerDay, currency]);
 
   const replyShare = useMemo(() => {
-    const parts = requestCostParts(selectedModel, inputTokens, outputTokens);
+    const parts = requestCostParts(selectedModel, inputTokens, billableOutput);
     return Math.round(parts.replyShare * 1000) / 10;
-  }, [selectedModel, inputTokens, outputTokens]);
+  }, [selectedModel, inputTokens, billableOutput]);
 
   const rows = useMemo(() => {
     const selectedCost = monthlyDisplayValue(
       selectedModel,
       inputTokens,
-      outputTokens,
+      billableOutput,
       requestsPerDay,
       currency,
     );
@@ -84,14 +86,14 @@ export function CostHero({
         const cost = monthlyDisplayValue(
           model,
           inputTokens,
-          outputTokens,
+          billableOutput,
           requestsPerDay,
           currency,
         );
         return { model, cost, same: cost === selectedCost };
       })
       .sort((a, b) => a.cost - b.cost);
-  }, [selectedModel, inputTokens, outputTokens, requestsPerDay, currency]);
+  }, [selectedModel, inputTokens, billableOutput, requestsPerDay, currency]);
 
   return (
     <section className="flex flex-col gap-10 min-[1100px]:flex-row min-[1100px]:items-end min-[1100px]:justify-between min-[1100px]:gap-12">
@@ -107,6 +109,7 @@ export function CostHero({
             animateRoll={animateCostRoll}
             symbol={symbol}
             variant="hero"
+            announceLabel="Estimated monthly cost"
           />
         </div>
         <p className="mt-[24px] text-[15px] text-muted">
@@ -122,7 +125,7 @@ export function CostHero({
           />{" "}
           requests a day
           {costFlowReady ? (
-            <> · {replyShare.toFixed(1)}% is the reply</>
+            <> · {Number.isFinite(replyShare) ? replyShare.toFixed(1) : "0.0"}% is the reply</>
           ) : null}
         </p>
         {selectedModel.priceNote ? (

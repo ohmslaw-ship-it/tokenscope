@@ -108,7 +108,9 @@ export function AnimatedShareBar({ share, soft = false }: AnimatedShareBarProps)
           style={{ minWidth }}
         />
       </div>
-      <span>{`${(Math.round(share * 1000) / 10).toFixed(1)}%`}</span>
+      <span>
+        {`${Number.isFinite(share) ? (Math.round(share * 1000) / 10).toFixed(1) : "0.0"}%`}
+      </span>
     </div>
   );
 }

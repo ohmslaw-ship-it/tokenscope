@@ -2,9 +2,11 @@
 
 import NumberFlow, { NumberFlowGroup } from "@number-flow/react";
 
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import {
   costFlowLocale,
   costFlowUsesDecimals,
+  formatCostInteger,
   splitCostAmount,
   type CostCurrency,
 } from "@/lib/cost";
@@ -16,7 +18,20 @@ type SplitCostNumberProps = {
   animateRoll?: boolean;
   symbol: string;
   variant: "hero" | "reply" | "compare";
+  announceLabel?: string;
 };
+
+function accessibleCostPhrase(
+  amount: number,
+  currency: CostCurrency,
+  symbol: string,
+): string {
+  const rounded = Math.round(amount * 100) / 100;
+  if (currency === "INR" || rounded >= 1_000) {
+    return `${symbol}${formatCostInteger(rounded, currency)}`;
+  }
+  return `${symbol}${rounded.toFixed(2)}`;
+}
 
 export function SplitCostNumber({
   amount,
@@ -25,6 +40,7 @@ export function SplitCostNumber({
   animateRoll = true,
   symbol,
   variant,
+  announceLabel,
 }: SplitCostNumberProps) {
   const value = costsReady ? amount : 0;
   const flowProps = { animated: animateRoll, willChange: animateRoll } as const;
@@ -48,8 +64,13 @@ export function SplitCostNumber({
     variant === "compare" ||
     costFlowUsesDecimals(currency, value);
 
+  const debouncedValue = useDebouncedValue(value, 600);
+  const announced = costsReady
+    ? accessibleCostPhrase(debouncedValue, currency, symbol)
+    : accessibleCostPhrase(0, currency, symbol);
+
   const wholeFlow = (
-    <span className={slotClass}>
+    <span className={slotClass} aria-hidden>
       <NumberFlow
         value={whole}
         locales={locale}
@@ -60,7 +81,7 @@ export function SplitCostNumber({
   );
 
   const fractionFlow = (
-    <span className={fracSlotClass}>
+    <span className={fracSlotClass} aria-hidden>
       <NumberFlow
         value={fraction}
         locales="en-US"
@@ -85,16 +106,22 @@ export function SplitCostNumber({
         : "reply-cost-symbol";
 
   return (
-    <p className={rowClass}>
-      <span className={symbolClass}>{symbol}</span>
-      {showFraction ? (
-        <NumberFlowGroup>
-          {wholeFlow}
-          {fractionFlow}
-        </NumberFlowGroup>
-      ) : (
-        wholeFlow
-      )}
-    </p>
+    <>
+      <p className={rowClass} aria-hidden>
+        <span className={symbolClass}>{symbol}</span>
+        {showFraction ? (
+          <NumberFlowGroup>
+            {wholeFlow}
+            {fractionFlow}
+          </NumberFlowGroup>
+        ) : (
+          wholeFlow
+        )}
+      </p>
+      <span className="sr-only" aria-live="polite">
+        {announceLabel ? `${announceLabel}: ` : ""}
+        {announced} per month
+      </span>
+    </>
   );
 }

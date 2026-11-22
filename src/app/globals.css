@@ -33,8 +33,20 @@ body {
 }
 
 :focus-visible {
-  outline: 1px solid rgba(124, 196, 224, 0.7);
+  outline: 2px solid rgba(124, 196, 224, 0.7);
   outline-offset: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }
 
 .hero-cost-slot {
@@ -221,6 +233,12 @@ body {
 
 .prompt-editor:focus-visible {
   outline: none;
+}
+
+.prompt-editor-shell:focus-within {
+  outline: 2px solid rgba(124, 196, 224, 0.7);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .ink-scroll {

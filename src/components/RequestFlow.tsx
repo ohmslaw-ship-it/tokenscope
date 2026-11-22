@@ -12,6 +12,7 @@ import { EditablePromptSection } from "@/components/PromptDocument";
 import type { ModelDefinition } from "@/data/models";
 import type { SectionId } from "@/data/sample";
 import type { TokenizedSection } from "@/hooks/useTokens";
+import { billableOutputTokens } from "@/lib/billing";
 import {
   clampReplyTokens,
   displayValueFromMonthlyUsd,
@@ -120,10 +121,11 @@ export function RequestFlow({
   const example2 = byId.example2;
   const user = byId.user;
   const inputTokens = sections.reduce((sum, section) => sum + section.tokens.length, 0);
+  const billableOutput = billableOutputTokens(inputTokens, replyTokens);
 
   const parts = useMemo(
-    () => requestCostParts(model, inputTokens, replyTokens),
-    [model, inputTokens, replyTokens],
+    () => requestCostParts(model, inputTokens, billableOutput),
+    [model, inputTokens, billableOutput],
   );
 
   const replyValue = useMemo(() => {
@@ -302,6 +304,7 @@ export function RequestFlow({
             animateRoll={animateCostRoll}
             symbol={symbol}
             variant="reply"
+            announceLabel="Reply cost"
           />
         </div>
         <p className="mt-2 text-[12.5px] text-muted">per month</p>
