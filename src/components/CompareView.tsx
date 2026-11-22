@@ -464,8 +464,10 @@ export function CompareView({
                     </div>
                     {selected ? (
                       <p className="mt-1 font-mono text-[11px] text-accent">Selected</p>
-                    ) : row.model.priceNote ? (
-                      <p className="mt-1 text-[12px] text-faint">{row.model.priceNote}</p>
+                    ) : row.model.priceNoteShort ? (
+                      <p className="mt-1 whitespace-nowrap text-[12px] text-faint">
+                        {row.model.priceNoteShort}
+                      </p>
                     ) : null}
                   </div>
                   <CompareCostBar widthShare={widthShare} inputShare={inputShare} />
@@ -506,8 +508,10 @@ export function CompareView({
                       </p>
                       {selected ? (
                         <p className="mt-1 font-mono text-[11px] text-accent">Selected</p>
-                      ) : row.model.priceNote ? (
-                        <p className="mt-1 text-[12px] text-faint">{row.model.priceNote}</p>
+                      ) : row.model.priceNoteShort ? (
+                        <p className="mt-1 whitespace-nowrap text-[12px] text-faint">
+                          {row.model.priceNoteShort}
+                        </p>
                       ) : null}
                     </div>
                     <SplitCostNumber
@@ -542,7 +546,7 @@ export function CompareView({
 
       <EntranceBlock
         delayMs={ENTRANCE_DELAYS_MS.comparePanel}
-        className="mt-8 min-[1100px]:absolute min-[1100px]:left-0 min-[1100px]:right-0 min-[1100px]:top-[606px] min-[1100px]:mt-0"
+        className="mt-8 min-[1100px]:absolute min-[1100px]:left-0 min-[1100px]:right-0 min-[1100px]:top-[clamp(606px,calc(606px+(100vh-900px)*0.5),690px)] min-[1100px]:mt-0"
       >
         <div className="min-h-[100px] rounded-[14px] bg-[linear-gradient(180deg,#172A50,#111F3E_70%)] px-[22px] py-[18px] shadow-[inset_0_0_0_1px_rgba(124,196,224,0.32),inset_0_1px_0_rgba(255,255,255,0.08),0_16px_40px_-16px_rgba(0,0,0,0.6)]">
           <CompareUserField
@@ -555,7 +559,7 @@ export function CompareView({
 
       <EntranceBlock
         delayMs={ENTRANCE_DELAYS_MS.compareFooter}
-        className="mt-6 text-[12.5px] text-faint min-[1100px]:absolute min-[1100px]:left-5 min-[1100px]:top-[728px] min-[1100px]:mt-0"
+        className="mt-6 text-[12.5px] text-faint min-[1100px]:absolute min-[1100px]:left-5 min-[1100px]:top-[clamp(728px,calc(728px+(100vh-900px)*0.5),812px)] min-[1100px]:mt-0"
       >
         Click a model to select it and open it in Inspect. System prompt and examples
         are edited in Inspect.

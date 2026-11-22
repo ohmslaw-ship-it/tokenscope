@@ -16,6 +16,7 @@ export type ModelDefinition = {
   maxInput?: number;
   longContext?: LongContextPricing;
   priceNote?: string;
+  priceNoteShort?: string;
 };
 
 /** Pricing verified from provider docs fetched 20 Nov 2026. */
@@ -75,6 +76,7 @@ export const models: ModelDefinition[] = [
     inputPricePerM: 0.75,
     outputPricePerM: 3.75,
     priceNote: "Promo rate until 31 Dec 2026 ($1.50 / $7.50 after)",
+    priceNoteShort: "Promo rate until 31 Dec 2026",
   },
 ];
 
