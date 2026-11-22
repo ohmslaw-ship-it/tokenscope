@@ -38,13 +38,15 @@ body {
 }
 
 .hero-cost-slot {
-  line-height: 0.9;
+  height: 1em;
+  line-height: 1;
+  overflow: clip;
 }
 
 .hero-cost {
   display: flex;
   align-items: baseline;
-  line-height: 0.8;
+  line-height: 1;
   white-space: nowrap;
 }
 
@@ -55,16 +57,12 @@ body {
   letter-spacing: -0.05em;
 }
 
-.hero-cost number-flow-react,
-.reply-cost number-flow-react {
-  margin-block: calc(var(--number-flow-mask-height, 0.25em) * -1);
-}
-
 .hero-cost number-flow-react {
   font-weight: 600;
-  line-height: 0.8;
+  line-height: 1;
   letter-spacing: 0;
   vertical-align: baseline;
+  margin-block: calc(var(--number-flow-mask-height, 0.25em) * -1);
 }
 
 .hero-cost number-flow-react::part(fraction) {
@@ -77,7 +75,9 @@ body {
 }
 
 .reply-cost-slot {
+  height: 1em;
   line-height: 1;
+  overflow: clip;
 }
 
 .reply-cost {
@@ -99,6 +99,7 @@ body {
   line-height: 1;
   vertical-align: baseline;
   font-variant-numeric: tabular-nums;
+  margin-block: calc(var(--number-flow-mask-height, 0.25em) * -1);
 }
 
 .cost-tabular {

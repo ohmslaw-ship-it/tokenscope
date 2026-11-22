@@ -4,7 +4,6 @@ import NumberFlow from "@number-flow/react";
 import { useMemo } from "react";
 
 import { InlineEditableNumber } from "@/components/InlineEditableNumber";
-import { useCostNumberFlow } from "@/hooks/useCostNumberFlow";
 import { models, type ModelDefinition } from "@/data/models";
 import {
   clampRequestsPerDay,
@@ -53,11 +52,6 @@ export function CostHero({
     return Math.round(amount * 100) / 100;
   }, [selectedModel, inputTokens, outputTokens, requestsPerDay, currency]);
 
-  const { show: showCost, animated: animateCost } = useCostNumberFlow(
-    costsReady,
-    heroValue,
-  );
-
   const replyShare = useMemo(() => {
     const parts = requestCostParts(selectedModel, inputTokens, outputTokens);
     return Math.round(parts.replyShare * 1000) / 10;
@@ -95,15 +89,12 @@ export function CostHero({
         >
           <p className="hero-cost cost-tabular">
             <span className="hero-cost-symbol">{symbol}</span>
-            {showCost ? (
-              <NumberFlow
-                value={heroValue}
-                locales="en-US"
-                format={{ minimumFractionDigits: 2, maximumFractionDigits: 2 }}
-                animated={animateCost}
-                willChange={animateCost}
-              />
-            ) : null}
+            <NumberFlow
+              value={costsReady ? heroValue : 0}
+              locales="en-US"
+              format={{ minimumFractionDigits: 2, maximumFractionDigits: 2 }}
+              willChange
+            />
           </p>
         </div>
         <p className="mt-[24px] text-[15px] text-muted">
