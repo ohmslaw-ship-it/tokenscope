@@ -322,7 +322,9 @@ export function CompareView({
     const minShare = shares.length > 0 ? Math.min(...shares) : 0;
     const floorPct = Math.floor(minShare * 1000) / 10;
     const roundedDown = Math.floor(floorPct / 10) * 10;
-    return { roundedDown, showReplyNote: roundedDown >= 50 };
+    const wholeBill =
+      shares.length > 0 && shares.every((s) => s >= 1 - 1e-9);
+    return { roundedDown, showReplyNote: roundedDown >= 50, wholeBill };
   }, [inputTokens, outputTokens]);
 
   const selectRow = useCallback(
@@ -384,8 +386,9 @@ export function CompareView({
           {subline.showReplyNote ? (
             <>
               {" "}
-              On every model, the reply is more than{" "}
-              {subline.roundedDown}% of the bill.
+              {subline.wholeBill
+                ? "On every model, the reply is the whole bill."
+                : `On every model, the reply is more than ${subline.roundedDown}% of the bill.`}
             </>
           ) : null}
         </p>
