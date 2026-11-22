@@ -40,6 +40,10 @@ export function useTokens() {
   const requestIdRef = useRef(0);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const textsRef = useRef(texts);
+  const lastSentSnapshotRef = useRef<string | null>(null);
+
+  const snapshotTexts = (source: Record<SectionId, string>) =>
+    promptSections.map((section) => source[section.id]).join("\x00");
 
   const postTokenize = useCallback((sections: string[]) => {
     const worker = workerRef.current;
@@ -70,7 +74,9 @@ export function useTokens() {
       setIsReady(true);
     };
 
-    postTokenize(promptSections.map((section) => section.text));
+    const initial = promptSections.map((section) => section.text);
+    postTokenize(initial);
+    lastSentSnapshotRef.current = snapshotTexts(textsRef.current);
 
     return () => {
       worker.terminate();
@@ -80,8 +86,12 @@ export function useTokens() {
 
   useEffect(() => {
     textsRef.current = texts;
+    const snapshot = snapshotTexts(texts);
+    if (snapshot === lastSentSnapshotRef.current) return;
+
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
+      lastSentSnapshotRef.current = snapshotTexts(textsRef.current);
       postTokenize(promptSections.map((section) => textsRef.current[section.id]));
     }, DEBOUNCE_MS);
 

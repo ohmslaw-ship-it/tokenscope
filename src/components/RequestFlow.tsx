@@ -4,6 +4,7 @@ import NumberFlow from "@number-flow/react";
 import { useMemo, useState } from "react";
 
 import { InlineEditableNumber } from "@/components/InlineEditableNumber";
+import { useCostNumberFlow } from "@/hooks/useCostNumberFlow";
 import { AppliedMarginNote, MarginNote } from "@/components/MarginNote";
 import { EditablePromptSection } from "@/components/PromptDocument";
 import type { ModelDefinition } from "@/data/models";
@@ -91,6 +92,7 @@ type RequestFlowProps = {
   onHoverSuggestion: (id: string | null) => void;
   onApply: (suggestion: Suggestion) => void;
   onUndo: () => void;
+  costsReady: boolean;
 };
 
 export function RequestFlow({
@@ -106,6 +108,7 @@ export function RequestFlow({
   onHoverSuggestion,
   onApply,
   onUndo,
+  costsReady,
 }: RequestFlowProps) {
   const [userFocused, setUserFocused] = useState(false);
   const symbol = currency === "INR" ? "₹" : "$";
@@ -136,6 +139,11 @@ export function RequestFlow({
   const replyFormat = useMemo(
     () => numberFlowFormat(currency, replyValue),
     [currency, replyValue],
+  );
+
+  const { show: showReplyCost, animated: animateReplyCost } = useCostNumberFlow(
+    costsReady,
+    replyValue,
   );
 
   const shareFor = (tokens: number) => inputSectionShare(parts, tokens, inputTokens);
@@ -279,15 +287,20 @@ export function RequestFlow({
           />{" "}
           tokens.
         </p>
-        <p className="reply-cost cost-tabular mt-5 text-[40px] font-semibold tracking-[-0.04em] whitespace-nowrap text-text">
-          <span>{symbol}</span>
-          <NumberFlow
-            value={replyValue}
-            locales="en-US"
-            format={replyFormat}
-            willChange
-          />
-        </p>
+        <div className="reply-cost-slot mt-5 text-[40px] text-text">
+          <p className="reply-cost cost-tabular">
+            <span className="reply-cost-symbol">{symbol}</span>
+            {showReplyCost ? (
+              <NumberFlow
+                value={replyValue}
+                locales="en-US"
+                format={replyFormat}
+                animated={animateReplyCost}
+                willChange={animateReplyCost}
+              />
+            ) : null}
+          </p>
+        </div>
         <p className="mt-2 text-[12.5px] text-muted">per month</p>
       </article>
     </section>

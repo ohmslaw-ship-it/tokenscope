@@ -11,7 +11,7 @@ import {
 import { createPortal } from "react-dom";
 
 import type { PromptToken } from "@/lib/tokens";
-import { segmentTokens } from "@/lib/tokens";
+import { mergeTextWithTokens } from "@/lib/tokens";
 
 type EditorTone = "prompt" | "user";
 type EditorMode = "fill" | "clip";
@@ -94,7 +94,10 @@ export function EditablePromptSection({
   const [hoveredWord, setHoveredWord] = useState<number | null>(null);
   const [tip, setTip] = useState<HoverTip | null>(null);
 
-  const pieces = useMemo(() => segmentTokens(tokens), [tokens]);
+  const pieces = useMemo(
+    () => mergeTextWithTokens(text, tokens),
+    [text, tokens],
+  );
   const highlightIndices = useMemo(
     () => new Set(trimHighlightIndices ?? []),
     [trimHighlightIndices],

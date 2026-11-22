@@ -4,6 +4,7 @@ import NumberFlow from "@number-flow/react";
 import { useMemo } from "react";
 
 import { InlineEditableNumber } from "@/components/InlineEditableNumber";
+import { useCostNumberFlow } from "@/hooks/useCostNumberFlow";
 import { models, type ModelDefinition } from "@/data/models";
 import {
   clampRequestsPerDay,
@@ -26,6 +27,7 @@ type CostHeroProps = {
   onRequestsPerDayChange: (value: number) => void;
   currency: CostCurrency;
   onSelectModel: (id: string) => void;
+  costsReady: boolean;
 };
 
 export function CostHero({
@@ -36,6 +38,7 @@ export function CostHero({
   onRequestsPerDayChange,
   currency,
   onSelectModel,
+  costsReady,
 }: CostHeroProps) {
   const symbol = currency === "INR" ? "₹" : "$";
 
@@ -49,6 +52,11 @@ export function CostHero({
     const amount = currency === "INR" ? usdToInr(usd) : usd;
     return Math.round(amount * 100) / 100;
   }, [selectedModel, inputTokens, outputTokens, requestsPerDay, currency]);
+
+  const { show: showCost, animated: animateCost } = useCostNumberFlow(
+    costsReady,
+    heroValue,
+  );
 
   const replyShare = useMemo(() => {
     const parts = requestCostParts(selectedModel, inputTokens, outputTokens);
@@ -81,22 +89,23 @@ export function CostHero({
   return (
     <section className="flex flex-col gap-10 min-[1100px]:flex-row min-[1100px]:items-end min-[1100px]:justify-between min-[1100px]:gap-12">
       <div className="min-w-0">
-        <p
-          className="hero-cost cost-tabular whitespace-nowrap text-text-hi"
-          style={{
-            fontSize: "clamp(32px, 10.5vw, 150px)",
-            fontWeight: 600,
-            letterSpacing: "-0.05em",
-          }}
+        <div
+          className="hero-cost-slot text-text-hi"
+          style={{ fontSize: "clamp(32px, 10.5vw, 150px)" }}
         >
-          <span>{symbol}</span>
-          <NumberFlow
-            value={heroValue}
-            locales="en-US"
-            format={{ minimumFractionDigits: 2, maximumFractionDigits: 2 }}
-            willChange
-          />
-        </p>
+          <p className="hero-cost cost-tabular">
+            <span className="hero-cost-symbol">{symbol}</span>
+            {showCost ? (
+              <NumberFlow
+                value={heroValue}
+                locales="en-US"
+                format={{ minimumFractionDigits: 2, maximumFractionDigits: 2 }}
+                animated={animateCost}
+                willChange={animateCost}
+              />
+            ) : null}
+          </p>
+        </div>
         <p className="mt-[24px] text-[15px] text-muted">
           per month on{" "}
           <span className="font-medium text-text">{selectedModel.name}</span> at{" "}
@@ -108,7 +117,10 @@ export function CostHero({
             ariaLabel="requests per day"
             className="font-medium text-text"
           />{" "}
-          requests a day · {replyShare.toFixed(1)}% is the reply
+          requests a day
+          {costsReady ? (
+            <> · {replyShare.toFixed(1)}% is the reply</>
+          ) : null}
         </p>
         {selectedModel.priceNote ? (
           <p className="mt-2 text-[13px] text-muted">{selectedModel.priceNote}</p>
@@ -129,9 +141,11 @@ export function CostHero({
             <span
               className={`cost-tabular whitespace-nowrap ${row.same ? "text-[13px] text-muted" : "text-[12.5px] text-text"}`}
             >
-              {row.same
-                ? "same price"
-                : `${symbol}${formatCostInteger(row.cost, currency)}`}
+              {!costsReady
+                ? ""
+                : row.same
+                  ? "same price"
+                  : `${symbol}${formatCostInteger(row.cost, currency)}`}
             </span>
           </button>
         ))}

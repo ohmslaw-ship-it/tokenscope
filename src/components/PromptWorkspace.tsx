@@ -23,7 +23,7 @@ type UndoState = {
 };
 
 export function PromptWorkspace() {
-  const { sections, total } = useTokens();
+  const { sections, total, isReady: costsReady } = useTokens();
   const [modelId, setModelId] = useState(defaultModelId);
   const [currency, setCurrency] = useState<CostCurrency>("INR");
   const [requestsPerDay, setRequestsPerDay] = useState(DEFAULT_REQUESTS_PER_DAY);
@@ -107,12 +107,14 @@ export function PromptWorkspace() {
             onRequestsPerDayChange={setRequestsPerDay}
             currency={currency}
             onSelectModel={setModelId}
+            costsReady={costsReady}
           />
         </div>
         <RequestFlow
           sections={sections}
           model={selectedModel}
           currency={currency}
+          costsReady={costsReady}
           replyTokens={replyTokens}
           onReplyTokensChange={setReplyTokens}
           requestsPerDay={requestsPerDay}
