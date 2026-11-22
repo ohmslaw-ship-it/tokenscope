@@ -3,8 +3,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { CostHero } from "@/components/CostHero";
+import { EntranceBlock, PageEntranceProvider } from "@/components/PageEntrance";
 import { RequestFlow } from "@/components/RequestFlow";
 import { TopBar } from "@/components/TopBar";
+import { usePageEntrance } from "@/hooks/usePageEntrance";
+import { ENTRANCE_DELAYS_MS } from "@/lib/entrance";
 import { defaultModelId, getModelById } from "@/data/models";
 import type { SectionId } from "@/data/sample";
 import { useTokens } from "@/hooks/useTokens";
@@ -23,7 +26,8 @@ type UndoState = {
 };
 
 export function PromptWorkspace() {
-  const { sections, total, isReady: costsReady } = useTokens();
+  const { sections, total, isReady: tokenReady } = useTokens();
+  const entrance = usePageEntrance(tokenReady);
   const [modelId, setModelId] = useState(defaultModelId);
   const [currency, setCurrency] = useState<CostCurrency>("INR");
   const [requestsPerDay, setRequestsPerDay] = useState(DEFAULT_REQUESTS_PER_DAY);
@@ -78,54 +82,60 @@ export function PromptWorkspace() {
   }, [undo]);
 
   return (
-    <div className="relative min-h-screen bg-bg min-[1100px]:h-screen min-[1100px]:overflow-hidden">
-      <div
-        aria-hidden
-        className="pointer-events-none fixed top-[-380px] left-[-200px] z-0 h-[900px] w-[1300px]"
-        style={{
-          background:
-            "radial-gradient(closest-side, rgba(40,70,130,.32), transparent)",
-        }}
-      />
-      <div className="relative z-10 min-h-screen min-[1100px]:h-full">
-        <div className="px-6 min-[1100px]:px-16">
-          <TopBar
-            selectedModel={selectedModel}
-            onSelectModel={setModelId}
-            currency={currency}
-            onCurrencyChange={setCurrency}
-            usedTokens={total + replyTokens}
-            contextWindow={selectedModel.contextWindow}
-          />
-        </div>
-        <div className="px-6 pt-8 min-[1100px]:absolute min-[1100px]:inset-x-16 min-[1100px]:top-[110px] min-[1100px]:px-0 min-[1100px]:pt-0">
-          <CostHero
-            selectedModel={selectedModel}
-            inputTokens={total}
-            outputTokens={replyTokens}
-            requestsPerDay={requestsPerDay}
-            onRequestsPerDayChange={setRequestsPerDay}
-            currency={currency}
-            onSelectModel={setModelId}
-            costsReady={costsReady}
-          />
-        </div>
-        <RequestFlow
-          sections={sections}
-          model={selectedModel}
-          currency={currency}
-          costsReady={costsReady}
-          replyTokens={replyTokens}
-          onReplyTokensChange={setReplyTokens}
-          requestsPerDay={requestsPerDay}
-          suggestions={suggestions}
-          undoSectionId={undo?.sectionId ?? null}
-          hoveredSuggestion={hoveredSuggestion}
-          onHoverSuggestion={setHoveredSuggestionId}
-          onApply={handleApply}
-          onUndo={handleUndo}
+    <PageEntranceProvider value={entrance}>
+      <div className="relative min-h-screen bg-bg min-[1100px]:h-screen min-[1100px]:overflow-hidden">
+        <div
+          aria-hidden
+          className="pointer-events-none fixed top-[-380px] left-[-200px] z-0 h-[900px] w-[1300px]"
+          style={{
+            background:
+              "radial-gradient(closest-side, rgba(40,70,130,.32), transparent)",
+          }}
         />
+        <div className="relative z-10 min-h-screen min-[1100px]:h-full">
+          <div className="px-6 min-[1100px]:px-16">
+            <EntranceBlock delayMs={ENTRANCE_DELAYS_MS.topBar}>
+              <TopBar
+                selectedModel={selectedModel}
+                onSelectModel={setModelId}
+                currency={currency}
+                onCurrencyChange={setCurrency}
+                usedTokens={total + replyTokens}
+                contextWindow={selectedModel.contextWindow}
+              />
+            </EntranceBlock>
+          </div>
+          <div className="px-6 pt-8 min-[1100px]:absolute min-[1100px]:inset-x-16 min-[1100px]:top-[110px] min-[1100px]:px-0 min-[1100px]:pt-0">
+            <CostHero
+              selectedModel={selectedModel}
+              inputTokens={total}
+              outputTokens={replyTokens}
+              requestsPerDay={requestsPerDay}
+              onRequestsPerDayChange={setRequestsPerDay}
+              currency={currency}
+              onSelectModel={setModelId}
+              costFlowReady={entrance.costFlowReady}
+              animateCostRoll={!entrance.reducedMotion}
+            />
+          </div>
+          <RequestFlow
+            sections={sections}
+            model={selectedModel}
+            currency={currency}
+            costFlowReady={entrance.costFlowReady}
+            animateCostRoll={!entrance.reducedMotion}
+            replyTokens={replyTokens}
+            onReplyTokensChange={setReplyTokens}
+            requestsPerDay={requestsPerDay}
+            suggestions={suggestions}
+            undoSectionId={undo?.sectionId ?? null}
+            hoveredSuggestion={hoveredSuggestion}
+            onHoverSuggestion={setHoveredSuggestionId}
+            onApply={handleApply}
+            onUndo={handleUndo}
+          />
+        </div>
       </div>
-    </div>
+    </PageEntranceProvider>
   );
 }

@@ -13,6 +13,7 @@ type SplitCostNumberProps = {
   amount: number;
   currency: CostCurrency;
   costsReady: boolean;
+  animateRoll?: boolean;
   symbol: string;
   variant: "hero" | "reply";
 };
@@ -21,10 +22,12 @@ export function SplitCostNumber({
   amount,
   currency,
   costsReady,
+  animateRoll = true,
   symbol,
   variant,
 }: SplitCostNumberProps) {
   const value = costsReady ? amount : 0;
+  const flowProps = { animated: animateRoll, willChange: animateRoll } as const;
   const { whole, fraction } = splitCostAmount(value);
   const locale = costFlowLocale(currency);
   const showFraction =
@@ -36,7 +39,7 @@ export function SplitCostNumber({
         value={whole}
         locales={locale}
         format={{ maximumFractionDigits: 0 }}
-        willChange
+        {...flowProps}
       />
     </span>
   );
@@ -52,7 +55,7 @@ export function SplitCostNumber({
         locales="en-US"
         format={{ minimumIntegerDigits: 2, useGrouping: false }}
         prefix="."
-        willChange
+        {...flowProps}
       />
     </span>
   );

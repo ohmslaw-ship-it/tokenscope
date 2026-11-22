@@ -2,8 +2,10 @@
 
 import { useMemo, useState } from "react";
 
+import { AnimatedShareBar, EntranceBlock } from "@/components/PageEntrance";
 import { InlineEditableNumber } from "@/components/InlineEditableNumber";
 import { SplitCostNumber } from "@/components/SplitCostNumber";
+import { ENTRANCE_DELAYS_MS } from "@/lib/entrance";
 import { AppliedMarginNote, MarginNote } from "@/components/MarginNote";
 import { EditablePromptSection } from "@/components/PromptDocument";
 import type { ModelDefinition } from "@/data/models";
@@ -22,30 +24,11 @@ import { charRangesToTokenIndices, type Suggestion } from "@/lib/trim";
 const formatCount = (value: number) =>
   new Intl.NumberFormat("en-US").format(value);
 
-function formatShare(share: number): string {
-  return `${(Math.round(share * 1000) / 10).toFixed(1)}%`;
-}
-
 const panelFrame =
   "flex h-auto min-h-[320px] flex-col overflow-hidden rounded-[14px] px-6 pt-6 min-[1100px]:h-full min-[1100px]:min-h-0";
 
 const panelSurface =
   "bg-surface shadow-[inset_0_1px_0_rgba(255,255,255,0.06),inset_0_0_0_1px_rgba(255,255,255,0.035),0_10px_30px_-12px_rgba(0,0,0,0.5)]";
-
-function ShareBar({ share, soft = false }: { share: number; soft?: boolean }) {
-  const width = Math.min(Math.max(share * 100, 0), 100);
-  return (
-    <div className="mt-3 flex items-center gap-2.5 font-mono text-[11px] text-muted">
-      <div className="relative h-0.5 flex-1 rounded-full bg-white/[0.07]">
-        <div
-          className={`absolute inset-y-0 left-0 rounded-full ${soft ? "bg-accent-soft" : "bg-accent"}`}
-          style={{ width: `${width}%`, minWidth: share > 0 ? 3 : 0 }}
-        />
-      </div>
-      <span>{formatShare(share)}</span>
-    </div>
-  );
-}
 
 function PanelHeader({
   title,
@@ -90,7 +73,8 @@ type RequestFlowProps = {
   onHoverSuggestion: (id: string | null) => void;
   onApply: (suggestion: Suggestion) => void;
   onUndo: () => void;
-  costsReady: boolean;
+  costFlowReady: boolean;
+  animateCostRoll: boolean;
 };
 
 export function RequestFlow({
@@ -106,7 +90,8 @@ export function RequestFlow({
   onHoverSuggestion,
   onApply,
   onUndo,
-  costsReady,
+  costFlowReady,
+  animateCostRoll,
 }: RequestFlowProps) {
   const [userFocused, setUserFocused] = useState(false);
   const symbol = currency === "INR" ? "₹" : "$";
@@ -178,9 +163,12 @@ export function RequestFlow({
 
   return (
     <section className="mt-12 grid grid-cols-1 gap-5 px-6 pb-8 min-[700px]:max-[1099px]:grid-cols-2 min-[1100px]:absolute min-[1100px]:inset-x-16 min-[1100px]:top-[404px] min-[1100px]:bottom-6 min-[1100px]:mt-0 min-[1100px]:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)_250px] min-[1100px]:grid-rows-[minmax(0,1fr)] min-[1100px]:px-0 min-[1100px]:pb-0">
-      <article className={`${panelFrame} ${panelSurface}`}>
+      <EntranceBlock
+        delayMs={ENTRANCE_DELAYS_MS.panelSystem}
+        className={`${panelFrame} ${panelSurface}`}
+      >
         <PanelHeader title="System" count={system.tokens.length} />
-        <ShareBar share={shareFor(system.tokens.length)} />
+        <AnimatedShareBar share={shareFor(system.tokens.length)} />
         <div className="relative mt-[30px] -mx-6 min-h-0 flex-1 max-[1099px]:h-[340px] max-[1099px]:flex-none">
           <div className="absolute inset-0">
             <EditablePromptSection
@@ -195,14 +183,19 @@ export function RequestFlow({
           </div>
         </div>
         {systemTrims ? <div className="pb-4">{systemTrims}</div> : null}
-      </article>
+      </EntranceBlock>
 
-      <article className={`${panelFrame} ${panelSurface}`}>
+      <EntranceBlock
+        delayMs={ENTRANCE_DELAYS_MS.panelExamples}
+        className={`${panelFrame} ${panelSurface}`}
+      >
         <PanelHeader
           title="Examples"
           count={example1.tokens.length + example2.tokens.length}
         />
-        <ShareBar share={shareFor(example1.tokens.length + example2.tokens.length)} />
+        <AnimatedShareBar
+          share={shareFor(example1.tokens.length + example2.tokens.length)}
+        />
         <div className="ink-scroll mt-5 flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto pb-6">
           {(
             [
@@ -234,13 +227,14 @@ export function RequestFlow({
             </div>
           ))}
         </div>
-      </article>
+      </EntranceBlock>
 
-      <article
+      <EntranceBlock
+        delayMs={ENTRANCE_DELAYS_MS.panelUser}
         className={`${panelFrame} max-[639px]:min-h-0 bg-[linear-gradient(180deg,#172A50,#111F3E_60%)] ${userShadow}`}
       >
         <PanelHeader title="User message" count={user.tokens.length} />
-        <ShareBar share={shareFor(user.tokens.length)} />
+        <AnimatedShareBar share={shareFor(user.tokens.length)} />
         <div className="relative mt-[22px] -mx-6 min-h-0 flex-1 max-[639px]:h-auto max-[639px]:min-h-[180px] max-[639px]:flex-none min-[640px]:max-[1099px]:h-[280px] min-[640px]:max-[1099px]:flex-none">
           <div className="absolute inset-0">
             <EditablePromptSection
@@ -258,11 +252,14 @@ export function RequestFlow({
           </div>
         </div>
         {userTrims ? <div className="pb-4">{userTrims}</div> : null}
-      </article>
+      </EntranceBlock>
 
-      <article className="flex h-auto min-h-[240px] flex-col overflow-hidden rounded-[14px] bg-transparent px-6 pt-6 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)] min-[1100px]:h-full min-[1100px]:min-h-0">
+      <EntranceBlock
+        delayMs={ENTRANCE_DELAYS_MS.panelReply}
+        className="flex h-auto min-h-[240px] flex-col overflow-hidden rounded-[14px] bg-transparent px-6 pt-6 shadow-[inset_0_0_0_1px_rgba(255,255,255,0.06)] min-[1100px]:h-full min-[1100px]:min-h-0"
+      >
         <PanelHeader title="Reply" count={replyTokens} muted />
-        <ShareBar share={parts.replyShare} soft />
+        <AnimatedShareBar share={parts.replyShare} soft />
         <p className="mt-[22px] text-[13px] leading-5 text-muted">
           Written by the model on every request, up to{" "}
           <InlineEditableNumber
@@ -279,13 +276,14 @@ export function RequestFlow({
           <SplitCostNumber
             amount={replyValue}
             currency={currency}
-            costsReady={costsReady}
+            costsReady={costFlowReady}
+            animateRoll={animateCostRoll}
             symbol={symbol}
             variant="reply"
           />
         </div>
         <p className="mt-2 text-[12.5px] text-muted">per month</p>
-      </article>
+      </EntranceBlock>
     </section>
   );
 }
