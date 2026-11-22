@@ -17,8 +17,8 @@ type EditorTone = "prompt" | "user";
 type EditorMode = "fill" | "clip";
 
 const TONE_CLASS: Record<EditorTone, string> = {
-  prompt: "font-mono text-[12px] leading-5 text-prompt",
-  user: "font-mono text-[12.5px] leading-[21px] text-text-hi",
+  prompt: "font-mono text-[13px] leading-[22px] text-prompt",
+  user: "font-mono text-[13.5px] leading-[23px] text-text-hi",
 };
 
 const SHARED = "whitespace-pre-wrap break-words";
@@ -224,14 +224,14 @@ export function EditablePromptSection({
     if (!next) clearHover();
   };
 
-  const clipped = mode === "clip" && !focused && naturalHeight > 100;
+  const clipped = mode === "clip" && !focused && naturalHeight > 110;
   const showFade = mode === "fill" && !focused && overflowing;
 
   const scrollerClass = [
     bleed ? "px-6" : "",
     mode === "clip"
       ? clipped
-        ? "max-h-[100px] overflow-hidden [mask-image:linear-gradient(#000_50%,transparent)] [-webkit-mask-image:linear-gradient(#000_50%,transparent)]"
+        ? "max-h-[110px] overflow-hidden [mask-image:linear-gradient(#000_50%,transparent)] [-webkit-mask-image:linear-gradient(#000_50%,transparent)]"
         : focused
           ? "ink-scroll max-h-[280px] overflow-y-auto"
           : ""
