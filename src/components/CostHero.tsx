@@ -82,12 +82,11 @@ export function CostHero({
     <section className="flex flex-col gap-10 min-[1100px]:flex-row min-[1100px]:items-end min-[1100px]:justify-between min-[1100px]:gap-12">
       <div className="min-w-0">
         <p
-          className="hero-cost whitespace-nowrap text-text-hi"
+          className="hero-cost cost-tabular whitespace-nowrap text-text-hi"
           style={{
             fontSize: "clamp(32px, 10.5vw, 150px)",
             fontWeight: 600,
             letterSpacing: "-0.05em",
-            lineHeight: 0.9,
           }}
         >
           <span>{symbol}</span>
@@ -98,7 +97,7 @@ export function CostHero({
             willChange
           />
         </p>
-        <p className="mt-6 text-[15px] text-muted">
+        <p className="mt-[24px] text-[15px] text-muted">
           per month on{" "}
           <span className="font-medium text-text">{selectedModel.name}</span> at{" "}
           <InlineEditableNumber
@@ -128,7 +127,7 @@ export function CostHero({
               {row.model.name}
             </span>
             <span
-              className={`whitespace-nowrap ${row.same ? "text-[13px] text-muted" : "font-mono text-[12.5px] text-text"}`}
+              className={`cost-tabular whitespace-nowrap ${row.same ? "text-[13px] text-muted" : "text-[12.5px] text-text"}`}
             >
               {row.same
                 ? "same price"

@@ -241,11 +241,11 @@ export function RequestFlow({
       </article>
 
       <article
-        className={`${panelFrame} bg-[linear-gradient(180deg,#172A50,#111F3E_60%)] ${userShadow}`}
+        className={`${panelFrame} max-[639px]:min-h-0 bg-[linear-gradient(180deg,#172A50,#111F3E_60%)] ${userShadow}`}
       >
         <PanelHeader title="User message" count={user.tokens.length} />
         <ShareBar share={shareFor(user.tokens.length)} />
-        <div className="relative mt-[22px] -mx-6 min-h-0 flex-1 max-[1099px]:h-[280px] max-[1099px]:flex-none">
+        <div className="relative mt-[22px] -mx-6 min-h-0 flex-1 max-[639px]:h-auto max-[639px]:min-h-[180px] max-[639px]:flex-none min-[640px]:max-[1099px]:h-[280px] min-[640px]:max-[1099px]:flex-none">
           <div className="absolute inset-0">
             <EditablePromptSection
               text={user.text}
@@ -279,7 +279,7 @@ export function RequestFlow({
           />{" "}
           tokens.
         </p>
-        <p className="mt-5 text-[40px] leading-none font-semibold tracking-[-0.04em] whitespace-nowrap text-text">
+        <p className="reply-cost cost-tabular mt-5 text-[40px] font-semibold tracking-[-0.04em] whitespace-nowrap text-text">
           <span>{symbol}</span>
           <NumberFlow
             value={replyValue}

@@ -37,10 +37,19 @@ body {
   outline-offset: 2px;
 }
 
+.hero-cost {
+  display: flex;
+  align-items: baseline;
+  line-height: 0.9;
+  overflow: visible;
+}
+
 .hero-cost number-flow-react {
+  --number-flow-mask-height: 0;
   font-weight: 600;
   letter-spacing: -0.05em;
   line-height: 0.9;
+  vertical-align: baseline;
 }
 
 .hero-cost number-flow-react::part(fraction) {
@@ -49,6 +58,25 @@ body {
   font-weight: 500;
   letter-spacing: -0.02em;
   color: var(--color-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.reply-cost {
+  display: flex;
+  align-items: baseline;
+  line-height: 1;
+  overflow: visible;
+}
+
+.reply-cost number-flow-react {
+  --number-flow-mask-height: 0;
+  line-height: 1;
+  vertical-align: baseline;
+  font-variant-numeric: tabular-nums;
+}
+
+.cost-tabular {
+  font-variant-numeric: tabular-nums;
 }
 
 .token-word--hot {
