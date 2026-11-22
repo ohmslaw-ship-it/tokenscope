@@ -384,7 +384,7 @@ export function CompareView({
         delayMs={ENTRANCE_DELAYS_MS.compareTable}
         className="mt-10 min-[1100px]:absolute min-[1100px]:left-0 min-[1100px]:right-0 min-[1100px]:top-[182px] min-[1100px]:mt-0"
       >
-        <div className="hidden grid-cols-[270px_minmax(0,1fr)_190px_130px_190px] gap-x-8 px-5 pb-3 font-mono text-[11px] tracking-[0.01em] text-faint min-[640px]:grid">
+        <div className="hidden grid-cols-[270px_minmax(0,1fr)_190px_130px_190px] gap-x-8 px-5 pb-3 font-mono text-[11px] tracking-[0.01em] text-faint min-[1100px]:grid">
           <div>Model</div>
           <div className="flex items-center gap-4">
             <span className="inline-flex items-center gap-1.5">
@@ -452,7 +452,7 @@ export function CompareView({
                   ease: ENTRANCE_EASE,
                 }}
               >
-                <div className="hidden h-[72px] grid-cols-[270px_minmax(0,1fr)_190px_130px_190px] items-center gap-x-8 px-5 min-[640px]:grid">
+                <div className="hidden h-[72px] grid-cols-[270px_minmax(0,1fr)_190px_130px_190px] items-center gap-x-8 px-5 min-[1100px]:grid">
                   <div>
                     <div className="text-[16px] font-medium tracking-[-0.01em] text-text">
                       <span className={selected ? "text-text-hi" : undefined}>
@@ -497,7 +497,7 @@ export function CompareView({
                   </div>
                 </div>
 
-                <div className="flex flex-col gap-2.5 px-4 py-4 min-[640px]:hidden">
+                <div className="flex flex-col gap-2.5 px-4 py-4 min-[640px]:px-5 min-[640px]:py-5 min-[1100px]:hidden">
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <p className="text-[16px] font-medium tracking-[-0.01em] text-text">

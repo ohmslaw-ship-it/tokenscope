@@ -178,17 +178,18 @@ export function formatCostInteger(
   value: number,
   currency: CostCurrency,
 ): string {
+  const locale = costFlowLocale(currency);
   if (currency === "INR") {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat(locale, {
       maximumFractionDigits: 0,
     }).format(Math.round(value));
   }
   if (value >= 1_000) {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat(locale, {
       maximumFractionDigits: 0,
     }).format(Math.round(value));
   }
-  return new Intl.NumberFormat("en-US", {
+  return new Intl.NumberFormat(locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(value);
