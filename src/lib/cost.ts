@@ -22,11 +22,10 @@ export function clampReplyTokens(value: number): number {
   return Math.min(REPLY_TOKENS_MAX, Math.max(REPLY_TOKENS_MIN, n));
 }
 
-export function perRequestUSD(
+export function effectivePricesPerM(
   model: ModelDefinition,
   inputTokens: number,
-  outputTokens: number,
-): number {
+): { input: number; output: number } {
   let inputPricePerM = model.inputPricePerM;
   let outputPricePerM = model.outputPricePerM;
 
@@ -35,9 +34,17 @@ export function perRequestUSD(
     outputPricePerM *= model.longContext.outputMultiplier;
   }
 
+  return { input: inputPricePerM, output: outputPricePerM };
+}
+
+export function perRequestUSD(
+  model: ModelDefinition,
+  inputTokens: number,
+  outputTokens: number,
+): number {
+  const { input, output } = effectivePricesPerM(model, inputTokens);
   return (
-    (inputTokens * inputPricePerM) / 1_000_000 +
-    (outputTokens * outputPricePerM) / 1_000_000
+    (inputTokens * input) / 1_000_000 + (outputTokens * output) / 1_000_000
   );
 }
 

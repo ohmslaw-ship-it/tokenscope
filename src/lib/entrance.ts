@@ -13,6 +13,12 @@ export const ENTRANCE_DELAYS_MS = {
   panelExamples: 260,
   panelUser: 320,
   panelReply: 380,
+  compareHeadline: 60,
+  compareSubline: 90,
+  compareTable: 120,
+  compareTableRowStagger: 30,
+  comparePanel: 200,
+  compareFooter: 260,
 } as const;
 
 export const SHARE_BAR_DELAY_S = 0.45;

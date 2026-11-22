@@ -15,7 +15,7 @@ type SplitCostNumberProps = {
   costsReady: boolean;
   animateRoll?: boolean;
   symbol: string;
-  variant: "hero" | "reply";
+  variant: "hero" | "reply" | "compare";
 };
 
 export function SplitCostNumber({
@@ -30,11 +30,26 @@ export function SplitCostNumber({
   const flowProps = { animated: animateRoll, willChange: animateRoll } as const;
   const { whole, fraction } = splitCostAmount(value);
   const locale = costFlowLocale(currency);
+  const slotClass =
+    variant === "hero"
+      ? "hero-cost-slot"
+      : variant === "compare"
+        ? "compare-cost-slot"
+        : "reply-cost-slot";
+  const fracSlotClass =
+    variant === "hero"
+      ? "hero-cost-frac-slot"
+      : variant === "compare"
+        ? "compare-cost-frac-slot"
+        : "reply-cost-frac-slot";
+
   const showFraction =
-    variant === "hero" || costFlowUsesDecimals(currency, value);
+    variant === "hero" ||
+    variant === "compare" ||
+    costFlowUsesDecimals(currency, value);
 
   const wholeFlow = (
-    <span className={variant === "hero" ? "hero-cost-slot" : "reply-cost-slot"}>
+    <span className={slotClass}>
       <NumberFlow
         value={whole}
         locales={locale}
@@ -45,11 +60,7 @@ export function SplitCostNumber({
   );
 
   const fractionFlow = (
-    <span
-      className={
-        variant === "hero" ? "hero-cost-frac-slot" : "reply-cost-frac-slot"
-      }
-    >
+    <span className={fracSlotClass}>
       <NumberFlow
         value={fraction}
         locales="en-US"
@@ -60,9 +71,18 @@ export function SplitCostNumber({
     </span>
   );
 
-  const rowClass = variant === "hero" ? "hero-cost cost-tabular" : "reply-cost cost-tabular";
+  const rowClass =
+    variant === "hero"
+      ? "hero-cost cost-tabular"
+      : variant === "compare"
+        ? "compare-cost cost-tabular"
+        : "reply-cost cost-tabular";
   const symbolClass =
-    variant === "hero" ? "hero-cost-symbol" : "reply-cost-symbol";
+    variant === "hero"
+      ? "hero-cost-symbol"
+      : variant === "compare"
+        ? "compare-cost-symbol"
+        : "reply-cost-symbol";
 
   return (
     <p className={rowClass}>

@@ -135,6 +135,61 @@ body {
   margin-block: calc(var(--number-flow-mask-height, 0.25em) * -1);
 }
 
+.compare-cost-slot {
+  display: inline-block;
+  flex: none;
+  height: 1em;
+  line-height: 1;
+  overflow: clip;
+}
+
+.compare-cost {
+  display: inline-flex;
+  align-items: baseline;
+  justify-content: flex-end;
+  line-height: 1;
+  white-space: nowrap;
+  font-size: 26px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  color: var(--color-text-hi);
+}
+
+.compare-cost-symbol {
+  flex: none;
+  margin-right: 0.04em;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+
+.compare-cost-slot number-flow-react {
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0;
+  vertical-align: baseline;
+  margin-block: calc(var(--number-flow-mask-height, 0.25em) * -1);
+}
+
+.compare-cost-frac-slot {
+  display: inline-block;
+  flex: none;
+  margin-left: 2px;
+  font-size: 0.538em;
+  font-weight: 500;
+  color: var(--color-muted);
+  height: 1em;
+  line-height: 1;
+  overflow: clip;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.compare-cost-frac-slot number-flow-react {
+  line-height: 1;
+  letter-spacing: 0;
+  margin-block: calc(var(--number-flow-mask-height, 0.25em) * -1);
+}
+
 .cost-tabular {
   font-variant-numeric: tabular-nums;
 }

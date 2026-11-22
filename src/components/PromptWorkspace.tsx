@@ -1,11 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 
+import { CompareView } from "@/components/CompareView";
 import { CostHero } from "@/components/CostHero";
 import { EntranceBlock, PageEntranceProvider } from "@/components/PageEntrance";
 import { RequestFlow } from "@/components/RequestFlow";
-import { TopBar } from "@/components/TopBar";
+import { TopBar, type WorkspaceView } from "@/components/TopBar";
 import { usePageEntrance } from "@/hooks/usePageEntrance";
 import { ENTRANCE_DELAYS_MS } from "@/lib/entrance";
 import { defaultModelId, getModelById } from "@/data/models";
@@ -28,6 +30,7 @@ type UndoState = {
 export function PromptWorkspace() {
   const { sections, total, isReady: tokenReady } = useTokens();
   const entrance = usePageEntrance(tokenReady);
+  const [view, setView] = useState<WorkspaceView>("inspect");
   const [modelId, setModelId] = useState(defaultModelId);
   const [currency, setCurrency] = useState<CostCurrency>("INR");
   const [requestsPerDay, setRequestsPerDay] = useState(DEFAULT_REQUESTS_PER_DAY);
@@ -96,6 +99,8 @@ export function PromptWorkspace() {
           <div className="px-6 min-[1100px]:px-16">
             <EntranceBlock delayMs={ENTRANCE_DELAYS_MS.topBar}>
               <TopBar
+                view={view}
+                onViewChange={setView}
                 selectedModel={selectedModel}
                 onSelectModel={setModelId}
                 currency={currency}
@@ -105,35 +110,66 @@ export function PromptWorkspace() {
               />
             </EntranceBlock>
           </div>
-          <div className="px-6 pt-8 min-[1100px]:absolute min-[1100px]:inset-x-16 min-[1100px]:top-[110px] min-[1100px]:px-0 min-[1100px]:pt-0">
-            <CostHero
-              selectedModel={selectedModel}
-              inputTokens={total}
-              outputTokens={replyTokens}
-              requestsPerDay={requestsPerDay}
-              onRequestsPerDayChange={setRequestsPerDay}
-              currency={currency}
-              onSelectModel={setModelId}
-              costFlowReady={entrance.costFlowReady}
-              animateCostRoll={!entrance.reducedMotion}
-            />
-          </div>
-          <RequestFlow
-            sections={sections}
-            model={selectedModel}
-            currency={currency}
-            costFlowReady={entrance.costFlowReady}
-            animateCostRoll={!entrance.reducedMotion}
-            replyTokens={replyTokens}
-            onReplyTokensChange={setReplyTokens}
-            requestsPerDay={requestsPerDay}
-            suggestions={suggestions}
-            undoSectionId={undo?.sectionId ?? null}
-            hoveredSuggestion={hoveredSuggestion}
-            onHoverSuggestion={setHoveredSuggestionId}
-            onApply={handleApply}
-            onUndo={handleUndo}
-          />
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={view}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{
+                duration: entrance.reducedMotion ? 0 : 0.2,
+              }}
+            >
+              {view === "inspect" ? (
+                <>
+                  <div className="px-6 pt-8 min-[1100px]:absolute min-[1100px]:inset-x-16 min-[1100px]:top-[110px] min-[1100px]:px-0 min-[1100px]:pt-0">
+                    <CostHero
+                      selectedModel={selectedModel}
+                      inputTokens={total}
+                      outputTokens={replyTokens}
+                      requestsPerDay={requestsPerDay}
+                      onRequestsPerDayChange={setRequestsPerDay}
+                      currency={currency}
+                      onSelectModel={setModelId}
+                      costFlowReady={entrance.costFlowReady}
+                      animateCostRoll={!entrance.reducedMotion}
+                    />
+                  </div>
+                  <RequestFlow
+                    sections={sections}
+                    model={selectedModel}
+                    currency={currency}
+                    costFlowReady={entrance.costFlowReady}
+                    animateCostRoll={!entrance.reducedMotion}
+                    replyTokens={replyTokens}
+                    onReplyTokensChange={setReplyTokens}
+                    requestsPerDay={requestsPerDay}
+                    suggestions={suggestions}
+                    undoSectionId={undo?.sectionId ?? null}
+                    hoveredSuggestion={hoveredSuggestion}
+                    onHoverSuggestion={setHoveredSuggestionId}
+                    onApply={handleApply}
+                    onUndo={handleUndo}
+                  />
+                </>
+              ) : (
+                <div className="px-6 pt-8 min-[1100px]:absolute min-[1100px]:inset-x-16 min-[1100px]:top-[110px] min-[1100px]:px-0 min-[1100px]:pt-0">
+                  <CompareView
+                    sections={sections}
+                    selectedModel={selectedModel}
+                    inputTokens={total}
+                    outputTokens={replyTokens}
+                    requestsPerDay={requestsPerDay}
+                    currency={currency}
+                    onSelectModel={setModelId}
+                    onViewChange={setView}
+                    costFlowReady={entrance.costFlowReady}
+                    animateCostRoll={!entrance.reducedMotion}
+                  />
+                </div>
+              )}
+            </motion.div>
+          </AnimatePresence>
         </div>
       </div>
     </PageEntranceProvider>

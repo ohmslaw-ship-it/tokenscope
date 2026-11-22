@@ -43,7 +43,11 @@ const segmentItem = "rounded-md px-[11px] py-[5px]";
 const segmentOn =
   "bg-white/[0.09] text-text-hi shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]";
 
+export type WorkspaceView = "inspect" | "compare";
+
 type TopBarProps = {
+  view: WorkspaceView;
+  onViewChange: (view: WorkspaceView) => void;
   selectedModel: ModelDefinition;
   onSelectModel: (id: string) => void;
   currency: CostCurrency;
@@ -53,6 +57,8 @@ type TopBarProps = {
 };
 
 export function TopBar({
+  view,
+  onViewChange,
   selectedModel,
   onSelectModel,
   currency,
@@ -134,14 +140,19 @@ export function TopBar({
           Tokenscope
         </div>
         <div className={segmentShell} role="group" aria-label="View mode">
-          <button type="button" className={`${segmentItem} ${segmentOn}`} aria-pressed>
+          <button
+            type="button"
+            className={`${segmentItem} ${view === "inspect" ? segmentOn : ""}`}
+            aria-pressed={view === "inspect"}
+            onClick={() => onViewChange("inspect")}
+          >
             Inspect
           </button>
           <button
             type="button"
-            className={segmentItem}
-            disabled
-            aria-disabled="true"
+            className={`${segmentItem} ${view === "compare" ? segmentOn : ""}`}
+            aria-pressed={view === "compare"}
+            onClick={() => onViewChange("compare")}
           >
             Compare
           </button>
